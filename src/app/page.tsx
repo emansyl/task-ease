@@ -1,4 +1,4 @@
-import { ArrowRight, Calendar, CheckSquare, Bell, List } from "lucide-react"
+import { ArrowRight, Calendar, CheckSquare, Bell, List } from "lucide-react";
 
 export default function Home() {
   return (
@@ -15,8 +15,12 @@ export default function Home() {
       <main className="flex-grow">
         <section className="bg-blue-50 py-12 md:py-20">
           <div className="container mx-auto px-4 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">Boost Your Productivity with TaskEase</h1>
-            <p className="text-xl text-gray-600 mb-8">Manage tasks, events, and priorities - all within WhatsApp</p>
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+              Boost Your Productivity with TaskEase
+            </h1>
+            <p className="text-xl text-gray-600 mb-8">
+              Manage tasks, events, and priorities - all within WhatsApp
+            </p>
             <div className="inline-block bg-yellow-400 text-yellow-800 px-4 py-2 rounded-full font-semibold mb-8">
               Coming Soon
             </div>
@@ -34,7 +38,9 @@ export default function Home() {
 
         <section id="features" className="py-12 md:py-20">
           <div className="container mx-auto px-4">
-            <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">Key Features</h2>
+            <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">
+              Key Features
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <FeatureCard
                 icon={<CheckSquare className="h-8 w-8 text-blue-600" />}
@@ -63,14 +69,24 @@ export default function Home() {
 
       <footer className="bg-gray-100 py-6">
         <div className="container mx-auto px-4 text-center text-gray-600">
-          <p>&copy; {new Date().getFullYear()} TaskEase. All rights reserved.</p>
+          <p>
+            &copy; {new Date().getFullYear()} TaskEase. All rights reserved.
+          </p>
         </div>
       </footer>
     </div>
-  )
+  );
 }
 
-function FeatureCard({ icon, title, description }) {
+function FeatureCard({
+  icon,
+  title,
+  description,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  description: string;
+}) {
   return (
     <div className="bg-white p-6 rounded-lg shadow-md">
       <div className="flex items-center mb-4">
@@ -79,6 +95,5 @@ function FeatureCard({ icon, title, description }) {
       </div>
       <p className="text-gray-600">{description}</p>
     </div>
-  )
+  );
 }
-
