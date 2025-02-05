@@ -35,7 +35,10 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(req: Request, props: { params: Promise<{ todoId: string }> }) {
+export async function GET(
+  req: Request,
+  props: { params: Promise<{ todoId: string }> }
+) {
   const params = await props.params;
   try {
     const supabase = await createClient();
@@ -62,7 +65,10 @@ export async function GET(req: Request, props: { params: Promise<{ todoId: strin
   }
 }
 
-export async function PATCH(req: Request, props: { params: Promise<{ todoId: string }> }) {
+export async function PATCH(
+  req: Request,
+  props: { params: Promise<{ todoId: string }> }
+) {
   const params = await props.params;
   try {
     const supabase = await createClient();
@@ -93,7 +99,11 @@ export async function PATCH(req: Request, props: { params: Promise<{ todoId: str
   }
 }
 
-export async function DELETE({ params }: { params: { todoId: string } }) {
+export async function DELETE(
+  req: Request,
+  props: { params: Promise<{ todoId: string }> }
+) {
+  const params = await props.params;
   try {
     const supabase = await createClient();
     const { data } = await supabase.auth.getUser();

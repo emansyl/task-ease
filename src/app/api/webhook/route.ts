@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     });
 
     // Send user message to OpenAI
-    const aiResponse = await getAIResponse(message);
+    const aiResponse = await getAIResponse(message, user.id);
     console.log("🤖 OpenAI Response:", aiResponse);
 
     // Save AI response in database
