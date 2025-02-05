@@ -35,10 +35,8 @@ export async function POST(req: Request) {
   }
 }
 
-export async function GET(
-  req: Request,
-  { params }: { params: { todoId: string } }
-) {
+export async function GET(req: Request, props: { params: Promise<{ todoId: string }> }) {
+  const params = await props.params;
   try {
     const supabase = await createClient();
     const { data } = await supabase.auth.getUser();
@@ -64,10 +62,8 @@ export async function GET(
   }
 }
 
-export async function PATCH(
-  req: Request,
-  { params }: { params: { todoId: string } }
-) {
+export async function PATCH(req: Request, props: { params: Promise<{ todoId: string }> }) {
+  const params = await props.params;
   try {
     const supabase = await createClient();
     const { data } = await supabase.auth.getUser();
