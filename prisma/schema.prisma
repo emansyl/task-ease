@@ -1,0 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id            String     @id @default(uuid())
+  phoneNumber   String?    @unique
+  name          String?
+  email         String?    @unique
+  optInWhatsApp Boolean    @default(false)
+  messages      Message[]
+  todoLists     TodoList[]
+  todos         Todo[] // For todos not in any list
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @default(now()) @updatedAt()
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  text      String
+  isBot     Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+model TodoList {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String
+  todos       Todo[]
+  isArchived  Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Todo {
+  id          String     @id @default(uuid())
+  title       String
+  description String?
+  status      TodoStatus @default(PENDING)
+  priority    Priority   @default(MEDIUM)
+  dueDate     DateTime?
+  list        TodoList?  @relation(fields: [listId], references: [id])
+  listId      String?
+  user        User       @relation(fields: [userId], references: [id])
+  userId      String
+  completedAt DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+enum TodoStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
