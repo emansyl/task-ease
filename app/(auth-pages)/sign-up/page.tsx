@@ -26,6 +26,7 @@ export default async function Signup(props: {
     searchParams &&
     "message" in searchParams &&
     searchParams.message &&
+    "type" in searchParams &&
     searchParams.type === "success"
   ) {
     return (
