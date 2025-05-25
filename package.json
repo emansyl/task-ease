@@ -5,6 +5,7 @@
     "build": "next build",
     "start": "next start"
   },
+  "postinstall": "prisma generate",
   "dependencies": {
     "@prisma/client": "^6.8.2",
     "@radix-ui/react-accordion": "^1.2.11",
