@@ -2,9 +2,10 @@
 "use server"; // Marks all functions in this file as Server Actions
 
 import prisma from "@/lib/prisma";
-import { TaskStatus } from "@prisma/client";
+
 import { revalidatePath } from "next/cache";
 import { getUserIdFromAuth } from "@/lib/auth"; // Your auth function
+import { TaskStatus } from "../generated/prisma";
 
 interface ToggleTaskCompletionResult {
   success: boolean;
