@@ -30,13 +30,14 @@ import {
 import CopyForwardingEmailButton from "@/components/dashboard/CopyForwardingEmailButton"; // Adjust path if needed
 
 import prisma from "@/lib/prisma";
-import { Urgency, TaskStatus } from "@prisma/client"; // Import Prisma types
+
 import {
   ProcessedEmailListItem,
   Task as UITask,
   Event as UIEvent,
 } from "@/lib/types"; // Your UI types
 import { addDays, startOfDay, endOfDay } from "date-fns";
+import { TaskStatus, Urgency } from "../generated/prisma";
 
 export interface DashboardData {
   userForwardingEmail: string | null;
