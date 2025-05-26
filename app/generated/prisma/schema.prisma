@@ -24,11 +24,12 @@ model User {
 model Email {
   id                 String           @id @default(cuid())
   userId             String           @db.Uuid
-  fromEmail          String
-  originalSubject    String
+  fromEmail          String?
+  originalSubject    String?
   summary            String?
   category           EmailCategory?
-  originalReceivedAt DateTime
+  status             EmailStatus?
+  originalReceivedAt DateTime?
   processedAt        DateTime         @default(now()) // Renamed from 'createdAt' to reflect when your system processed it
   tasks              Task[]
   taskLogs           TaskLog[]
@@ -134,4 +135,10 @@ enum EmailCategory {
   Personal_Finance
   General_Announcement
   Other
+}
+
+enum EmailStatus {
+  pending
+  processed
+  error
 }

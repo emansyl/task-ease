@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { extractInformationFromEmail, ExtractedEmailData } from "@/lib/ai";
-import { EmailCategory, Urgency } from "@/app/generated/prisma";
+import { EmailCategory, EmailStatus, Urgency } from "@/app/generated/prisma";
 
 const aiCategoryToPrismaEnumMap: { [key: string]: EmailCategory } = {
   "Academic/Classes": EmailCategory.Academic_Classes,
@@ -61,7 +61,6 @@ export async function POST(req: NextRequest) {
 
   try {
     const toHeader = formData.get("to")?.toString() || "";
-    const subjectHeader = formData.get("subject")?.toString() || "(no subject)";
 
     const recipient = toHeader.toLowerCase().split(",")[0].trim();
     const forwardingEmailUsername = recipient.split("@")[0];
@@ -84,7 +83,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Call the AI function (ensure its signature matches this)
+    // Create email record with status "pending"
+    const createdEmail = await prisma.email.create({
+      data: {
+        userId: user.id,
+        status: EmailStatus.pending,
+      },
+    });
+    emailRecordId = createdEmail.id;
+
+    // Call the AI function
     const extractedInfo = await extractInformationFromEmail(emailBodyToProcess);
     aiResponseData = extractedInfo; // Store for logging
 
@@ -93,8 +101,16 @@ export async function POST(req: NextRequest) {
       async (tx) => {
         const emailCategory =
           mapCategoryToEnum(extractedInfo.category) || EmailCategory.Other;
+        if (!emailRecordId) {
+          console.error("Failed to create email record");
+          return NextResponse.json(
+            { error: "Failed to create email record" },
+            { status: 500 }
+          );
+        }
 
-        const createdEmail = await tx.email.create({
+        await tx.email.update({
+          where: { id: emailRecordId },
           data: {
             userId: user.id,
             fromEmail: extractedInfo.details.from || "Unknown Sender",
@@ -103,13 +119,11 @@ export async function POST(req: NextRequest) {
             summary: extractedInfo.summary,
             originalReceivedAt: extractedInfo.details.received_at
               ? new Date(extractedInfo.details.received_at)
-              : receivedTimestamp, // Fallback to processed time
+              : receivedTimestamp,
             category: emailCategory,
-            processedAt: receivedTimestamp, // When your system processed it
-            // tasks, events, keyInformation will be linked below
+            processedAt: receivedTimestamp,
           },
         });
-        emailRecordId = createdEmail.id; // Store for logging
 
         // Create Tasks
         if (extractedInfo.tasks && extractedInfo.tasks.length > 0) {
