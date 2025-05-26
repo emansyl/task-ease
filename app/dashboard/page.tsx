@@ -241,7 +241,7 @@ async function DashboardPageContent({ data }: { data: DashboardData }) {
           )}
           <p className="text-xs text-muted-foreground mt-3">
             <Link
-              href="/settings/forwarding-guide"
+              href="/guide/forwarding"
               className="underline hover:text-primary"
             >
               How to set up email forwarding?

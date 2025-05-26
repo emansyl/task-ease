@@ -14,10 +14,16 @@ export default function CopyForwardingEmailButton({
 }: CopyForwardingEmailButtonProps) {
   const [copied, setCopied] = useState(false);
 
+  const domain =
+    process.env.NODE_ENV === "production"
+      ? "inbox.usetaskease.com"
+      : "inbox.dev.usetaskease.com";
+  const forwardingEmail = email + "@" + domain;
+
   const handleCopy = () => {
     if (!email) return;
     navigator.clipboard
-      .writeText(email)
+      .writeText(forwardingEmail)
       .then(() => {
         setCopied(true);
         setTimeout(() => setCopied(false), 2000); // Reset after 2 seconds
@@ -29,15 +35,10 @@ export default function CopyForwardingEmailButton({
       });
   };
 
-  const domain =
-    process.env.NODE_ENV === "production"
-      ? "inbox.usetaskease.com"
-      : "inbox.dev.usetaskease.com";
-
   return (
     <div className="flex items-center gap-2 mt-1">
       <code className="text-sm bg-muted px-2 py-1 rounded whitespace-nowrap overflow-hidden text-ellipsis">
-        {email + "@" + domain}
+        {forwardingEmail}
       </code>
       <Button
         variant="outline"
