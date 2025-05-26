@@ -85,6 +85,15 @@ export const EmailCategory: {
 
 export type EmailCategory = (typeof EmailCategory)[keyof typeof EmailCategory]
 
+
+export const EmailStatus: {
+  pending: 'pending',
+  processed: 'processed',
+  error: 'error'
+};
+
+export type EmailStatus = (typeof EmailStatus)[keyof typeof EmailStatus]
+
 }
 
 export type TaskStatus = $Enums.TaskStatus
@@ -98,6 +107,10 @@ export const Urgency: typeof $Enums.Urgency
 export type EmailCategory = $Enums.EmailCategory
 
 export const EmailCategory: typeof $Enums.EmailCategory
+
+export type EmailStatus = $Enums.EmailStatus
+
+export const EmailStatus: typeof $Enums.EmailStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -2868,6 +2881,7 @@ export namespace Prisma {
     originalSubject: string | null
     summary: string | null
     category: $Enums.EmailCategory | null
+    status: $Enums.EmailStatus | null
     originalReceivedAt: Date | null
     processedAt: Date | null
   }
@@ -2879,6 +2893,7 @@ export namespace Prisma {
     originalSubject: string | null
     summary: string | null
     category: $Enums.EmailCategory | null
+    status: $Enums.EmailStatus | null
     originalReceivedAt: Date | null
     processedAt: Date | null
   }
@@ -2890,6 +2905,7 @@ export namespace Prisma {
     originalSubject: number
     summary: number
     category: number
+    status: number
     originalReceivedAt: number
     processedAt: number
     _all: number
@@ -2903,6 +2919,7 @@ export namespace Prisma {
     originalSubject?: true
     summary?: true
     category?: true
+    status?: true
     originalReceivedAt?: true
     processedAt?: true
   }
@@ -2914,6 +2931,7 @@ export namespace Prisma {
     originalSubject?: true
     summary?: true
     category?: true
+    status?: true
     originalReceivedAt?: true
     processedAt?: true
   }
@@ -2925,6 +2943,7 @@ export namespace Prisma {
     originalSubject?: true
     summary?: true
     category?: true
+    status?: true
     originalReceivedAt?: true
     processedAt?: true
     _all?: true
@@ -3005,11 +3024,12 @@ export namespace Prisma {
   export type EmailGroupByOutputType = {
     id: string
     userId: string
-    fromEmail: string
-    originalSubject: string
+    fromEmail: string | null
+    originalSubject: string | null
     summary: string | null
     category: $Enums.EmailCategory | null
-    originalReceivedAt: Date
+    status: $Enums.EmailStatus | null
+    originalReceivedAt: Date | null
     processedAt: Date
     _count: EmailCountAggregateOutputType | null
     _min: EmailMinAggregateOutputType | null
@@ -3037,6 +3057,7 @@ export namespace Prisma {
     originalSubject?: boolean
     summary?: boolean
     category?: boolean
+    status?: boolean
     originalReceivedAt?: boolean
     processedAt?: boolean
     tasks?: boolean | Email$tasksArgs<ExtArgs>
@@ -3054,6 +3075,7 @@ export namespace Prisma {
     originalSubject?: boolean
     summary?: boolean
     category?: boolean
+    status?: boolean
     originalReceivedAt?: boolean
     processedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -3066,6 +3088,7 @@ export namespace Prisma {
     originalSubject?: boolean
     summary?: boolean
     category?: boolean
+    status?: boolean
     originalReceivedAt?: boolean
     processedAt?: boolean
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -3078,11 +3101,12 @@ export namespace Prisma {
     originalSubject?: boolean
     summary?: boolean
     category?: boolean
+    status?: boolean
     originalReceivedAt?: boolean
     processedAt?: boolean
   }
 
-  export type EmailOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "fromEmail" | "originalSubject" | "summary" | "category" | "originalReceivedAt" | "processedAt", ExtArgs["result"]["email"]>
+  export type EmailOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "fromEmail" | "originalSubject" | "summary" | "category" | "status" | "originalReceivedAt" | "processedAt", ExtArgs["result"]["email"]>
   export type EmailInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tasks?: boolean | Email$tasksArgs<ExtArgs>
     taskLogs?: boolean | Email$taskLogsArgs<ExtArgs>
@@ -3110,11 +3134,12 @@ export namespace Prisma {
     scalars: $Extensions.GetPayloadResult<{
       id: string
       userId: string
-      fromEmail: string
-      originalSubject: string
+      fromEmail: string | null
+      originalSubject: string | null
       summary: string | null
       category: $Enums.EmailCategory | null
-      originalReceivedAt: Date
+      status: $Enums.EmailStatus | null
+      originalReceivedAt: Date | null
       processedAt: Date
     }, ExtArgs["result"]["email"]>
     composites: {}
@@ -3550,6 +3575,7 @@ export namespace Prisma {
     readonly originalSubject: FieldRef<"Email", 'String'>
     readonly summary: FieldRef<"Email", 'String'>
     readonly category: FieldRef<"Email", 'EmailCategory'>
+    readonly status: FieldRef<"Email", 'EmailStatus'>
     readonly originalReceivedAt: FieldRef<"Email", 'DateTime'>
     readonly processedAt: FieldRef<"Email", 'DateTime'>
   }
@@ -9856,6 +9882,7 @@ export namespace Prisma {
     originalSubject: 'originalSubject',
     summary: 'summary',
     category: 'category',
+    status: 'status',
     originalReceivedAt: 'originalReceivedAt',
     processedAt: 'processedAt'
   };
@@ -10007,6 +10034,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'EmailStatus'
+   */
+  export type EnumEmailStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmailStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'EmailStatus[]'
+   */
+  export type ListEnumEmailStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'EmailStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Urgency'
    */
   export type EnumUrgencyFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Urgency'>
@@ -10126,11 +10167,12 @@ export namespace Prisma {
     NOT?: EmailWhereInput | EmailWhereInput[]
     id?: StringFilter<"Email"> | string
     userId?: UuidFilter<"Email"> | string
-    fromEmail?: StringFilter<"Email"> | string
-    originalSubject?: StringFilter<"Email"> | string
+    fromEmail?: StringNullableFilter<"Email"> | string | null
+    originalSubject?: StringNullableFilter<"Email"> | string | null
     summary?: StringNullableFilter<"Email"> | string | null
     category?: EnumEmailCategoryNullableFilter<"Email"> | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFilter<"Email"> | Date | string
+    status?: EnumEmailStatusNullableFilter<"Email"> | $Enums.EmailStatus | null
+    originalReceivedAt?: DateTimeNullableFilter<"Email"> | Date | string | null
     processedAt?: DateTimeFilter<"Email"> | Date | string
     tasks?: TaskListRelationFilter
     taskLogs?: TaskLogListRelationFilter
@@ -10142,11 +10184,12 @@ export namespace Prisma {
   export type EmailOrderByWithRelationInput = {
     id?: SortOrder
     userId?: SortOrder
-    fromEmail?: SortOrder
-    originalSubject?: SortOrder
+    fromEmail?: SortOrderInput | SortOrder
+    originalSubject?: SortOrderInput | SortOrder
     summary?: SortOrderInput | SortOrder
     category?: SortOrderInput | SortOrder
-    originalReceivedAt?: SortOrder
+    status?: SortOrderInput | SortOrder
+    originalReceivedAt?: SortOrderInput | SortOrder
     processedAt?: SortOrder
     tasks?: TaskOrderByRelationAggregateInput
     taskLogs?: TaskLogOrderByRelationAggregateInput
@@ -10161,11 +10204,12 @@ export namespace Prisma {
     OR?: EmailWhereInput[]
     NOT?: EmailWhereInput | EmailWhereInput[]
     userId?: UuidFilter<"Email"> | string
-    fromEmail?: StringFilter<"Email"> | string
-    originalSubject?: StringFilter<"Email"> | string
+    fromEmail?: StringNullableFilter<"Email"> | string | null
+    originalSubject?: StringNullableFilter<"Email"> | string | null
     summary?: StringNullableFilter<"Email"> | string | null
     category?: EnumEmailCategoryNullableFilter<"Email"> | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFilter<"Email"> | Date | string
+    status?: EnumEmailStatusNullableFilter<"Email"> | $Enums.EmailStatus | null
+    originalReceivedAt?: DateTimeNullableFilter<"Email"> | Date | string | null
     processedAt?: DateTimeFilter<"Email"> | Date | string
     tasks?: TaskListRelationFilter
     taskLogs?: TaskLogListRelationFilter
@@ -10177,11 +10221,12 @@ export namespace Prisma {
   export type EmailOrderByWithAggregationInput = {
     id?: SortOrder
     userId?: SortOrder
-    fromEmail?: SortOrder
-    originalSubject?: SortOrder
+    fromEmail?: SortOrderInput | SortOrder
+    originalSubject?: SortOrderInput | SortOrder
     summary?: SortOrderInput | SortOrder
     category?: SortOrderInput | SortOrder
-    originalReceivedAt?: SortOrder
+    status?: SortOrderInput | SortOrder
+    originalReceivedAt?: SortOrderInput | SortOrder
     processedAt?: SortOrder
     _count?: EmailCountOrderByAggregateInput
     _max?: EmailMaxOrderByAggregateInput
@@ -10194,11 +10239,12 @@ export namespace Prisma {
     NOT?: EmailScalarWhereWithAggregatesInput | EmailScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Email"> | string
     userId?: UuidWithAggregatesFilter<"Email"> | string
-    fromEmail?: StringWithAggregatesFilter<"Email"> | string
-    originalSubject?: StringWithAggregatesFilter<"Email"> | string
+    fromEmail?: StringNullableWithAggregatesFilter<"Email"> | string | null
+    originalSubject?: StringNullableWithAggregatesFilter<"Email"> | string | null
     summary?: StringNullableWithAggregatesFilter<"Email"> | string | null
     category?: EnumEmailCategoryNullableWithAggregatesFilter<"Email"> | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeWithAggregatesFilter<"Email"> | Date | string
+    status?: EnumEmailStatusNullableWithAggregatesFilter<"Email"> | $Enums.EmailStatus | null
+    originalReceivedAt?: DateTimeNullableWithAggregatesFilter<"Email"> | Date | string | null
     processedAt?: DateTimeWithAggregatesFilter<"Email"> | Date | string
   }
 
@@ -10660,11 +10706,12 @@ export namespace Prisma {
 
   export type EmailCreateInput = {
     id?: string
-    fromEmail: string
-    originalSubject: string
+    fromEmail?: string | null
+    originalSubject?: string | null
     summary?: string | null
     category?: $Enums.EmailCategory | null
-    originalReceivedAt: Date | string
+    status?: $Enums.EmailStatus | null
+    originalReceivedAt?: Date | string | null
     processedAt?: Date | string
     tasks?: TaskCreateNestedManyWithoutEmailInput
     taskLogs?: TaskLogCreateNestedManyWithoutEmailInput
@@ -10676,11 +10723,12 @@ export namespace Prisma {
   export type EmailUncheckedCreateInput = {
     id?: string
     userId: string
-    fromEmail: string
-    originalSubject: string
+    fromEmail?: string | null
+    originalSubject?: string | null
     summary?: string | null
     category?: $Enums.EmailCategory | null
-    originalReceivedAt: Date | string
+    status?: $Enums.EmailStatus | null
+    originalReceivedAt?: Date | string | null
     processedAt?: Date | string
     tasks?: TaskUncheckedCreateNestedManyWithoutEmailInput
     taskLogs?: TaskLogUncheckedCreateNestedManyWithoutEmailInput
@@ -10690,11 +10738,12 @@ export namespace Prisma {
 
   export type EmailUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    fromEmail?: StringFieldUpdateOperationsInput | string
-    originalSubject?: StringFieldUpdateOperationsInput | string
+    fromEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originalSubject?: NullableStringFieldUpdateOperationsInput | string | null
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     category?: NullableEnumEmailCategoryFieldUpdateOperationsInput | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: NullableEnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus | null
+    originalReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tasks?: TaskUpdateManyWithoutEmailNestedInput
     taskLogs?: TaskLogUpdateManyWithoutEmailNestedInput
@@ -10706,11 +10755,12 @@ export namespace Prisma {
   export type EmailUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    fromEmail?: StringFieldUpdateOperationsInput | string
-    originalSubject?: StringFieldUpdateOperationsInput | string
+    fromEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originalSubject?: NullableStringFieldUpdateOperationsInput | string | null
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     category?: NullableEnumEmailCategoryFieldUpdateOperationsInput | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: NullableEnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus | null
+    originalReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tasks?: TaskUncheckedUpdateManyWithoutEmailNestedInput
     taskLogs?: TaskLogUncheckedUpdateManyWithoutEmailNestedInput
@@ -10721,32 +10771,35 @@ export namespace Prisma {
   export type EmailCreateManyInput = {
     id?: string
     userId: string
-    fromEmail: string
-    originalSubject: string
+    fromEmail?: string | null
+    originalSubject?: string | null
     summary?: string | null
     category?: $Enums.EmailCategory | null
-    originalReceivedAt: Date | string
+    status?: $Enums.EmailStatus | null
+    originalReceivedAt?: Date | string | null
     processedAt?: Date | string
   }
 
   export type EmailUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    fromEmail?: StringFieldUpdateOperationsInput | string
-    originalSubject?: StringFieldUpdateOperationsInput | string
+    fromEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originalSubject?: NullableStringFieldUpdateOperationsInput | string | null
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     category?: NullableEnumEmailCategoryFieldUpdateOperationsInput | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: NullableEnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus | null
+    originalReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type EmailUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    fromEmail?: StringFieldUpdateOperationsInput | string
-    originalSubject?: StringFieldUpdateOperationsInput | string
+    fromEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originalSubject?: NullableStringFieldUpdateOperationsInput | string | null
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     category?: NullableEnumEmailCategoryFieldUpdateOperationsInput | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: NullableEnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus | null
+    originalReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
@@ -11333,6 +11386,13 @@ export namespace Prisma {
     not?: NestedEnumEmailCategoryNullableFilter<$PrismaModel> | $Enums.EmailCategory | null
   }
 
+  export type EnumEmailStatusNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.EmailStatus | EnumEmailStatusFieldRefInput<$PrismaModel> | null
+    in?: $Enums.EmailStatus[] | ListEnumEmailStatusFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.EmailStatus[] | ListEnumEmailStatusFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumEmailStatusNullableFilter<$PrismaModel> | $Enums.EmailStatus | null
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -11356,6 +11416,7 @@ export namespace Prisma {
     originalSubject?: SortOrder
     summary?: SortOrder
     category?: SortOrder
+    status?: SortOrder
     originalReceivedAt?: SortOrder
     processedAt?: SortOrder
   }
@@ -11367,6 +11428,7 @@ export namespace Prisma {
     originalSubject?: SortOrder
     summary?: SortOrder
     category?: SortOrder
+    status?: SortOrder
     originalReceivedAt?: SortOrder
     processedAt?: SortOrder
   }
@@ -11378,6 +11440,7 @@ export namespace Prisma {
     originalSubject?: SortOrder
     summary?: SortOrder
     category?: SortOrder
+    status?: SortOrder
     originalReceivedAt?: SortOrder
     processedAt?: SortOrder
   }
@@ -11408,6 +11471,16 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedEnumEmailCategoryNullableFilter<$PrismaModel>
     _max?: NestedEnumEmailCategoryNullableFilter<$PrismaModel>
+  }
+
+  export type EnumEmailStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.EmailStatus | EnumEmailStatusFieldRefInput<$PrismaModel> | null
+    in?: $Enums.EmailStatus[] | ListEnumEmailStatusFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.EmailStatus[] | ListEnumEmailStatusFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumEmailStatusNullableWithAggregatesFilter<$PrismaModel> | $Enums.EmailStatus | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumEmailStatusNullableFilter<$PrismaModel>
+    _max?: NestedEnumEmailStatusNullableFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -11965,6 +12038,10 @@ export namespace Prisma {
     set?: $Enums.EmailCategory | null
   }
 
+  export type NullableEnumEmailStatusFieldUpdateOperationsInput = {
+    set?: $Enums.EmailStatus | null
+  }
+
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
@@ -12517,6 +12594,13 @@ export namespace Prisma {
     not?: NestedEnumEmailCategoryNullableFilter<$PrismaModel> | $Enums.EmailCategory | null
   }
 
+  export type NestedEnumEmailStatusNullableFilter<$PrismaModel = never> = {
+    equals?: $Enums.EmailStatus | EnumEmailStatusFieldRefInput<$PrismaModel> | null
+    in?: $Enums.EmailStatus[] | ListEnumEmailStatusFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.EmailStatus[] | ListEnumEmailStatusFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumEmailStatusNullableFilter<$PrismaModel> | $Enums.EmailStatus | null
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -12553,6 +12637,16 @@ export namespace Prisma {
     _count?: NestedIntNullableFilter<$PrismaModel>
     _min?: NestedEnumEmailCategoryNullableFilter<$PrismaModel>
     _max?: NestedEnumEmailCategoryNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumEmailStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.EmailStatus | EnumEmailStatusFieldRefInput<$PrismaModel> | null
+    in?: $Enums.EmailStatus[] | ListEnumEmailStatusFieldRefInput<$PrismaModel> | null
+    notIn?: $Enums.EmailStatus[] | ListEnumEmailStatusFieldRefInput<$PrismaModel> | null
+    not?: NestedEnumEmailStatusNullableWithAggregatesFilter<$PrismaModel> | $Enums.EmailStatus | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedEnumEmailStatusNullableFilter<$PrismaModel>
+    _max?: NestedEnumEmailStatusNullableFilter<$PrismaModel>
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -12618,11 +12712,12 @@ export namespace Prisma {
 
   export type EmailCreateWithoutUserInput = {
     id?: string
-    fromEmail: string
-    originalSubject: string
+    fromEmail?: string | null
+    originalSubject?: string | null
     summary?: string | null
     category?: $Enums.EmailCategory | null
-    originalReceivedAt: Date | string
+    status?: $Enums.EmailStatus | null
+    originalReceivedAt?: Date | string | null
     processedAt?: Date | string
     tasks?: TaskCreateNestedManyWithoutEmailInput
     taskLogs?: TaskLogCreateNestedManyWithoutEmailInput
@@ -12632,11 +12727,12 @@ export namespace Prisma {
 
   export type EmailUncheckedCreateWithoutUserInput = {
     id?: string
-    fromEmail: string
-    originalSubject: string
+    fromEmail?: string | null
+    originalSubject?: string | null
     summary?: string | null
     category?: $Enums.EmailCategory | null
-    originalReceivedAt: Date | string
+    status?: $Enums.EmailStatus | null
+    originalReceivedAt?: Date | string | null
     processedAt?: Date | string
     tasks?: TaskUncheckedCreateNestedManyWithoutEmailInput
     taskLogs?: TaskLogUncheckedCreateNestedManyWithoutEmailInput
@@ -12806,11 +12902,12 @@ export namespace Prisma {
     NOT?: EmailScalarWhereInput | EmailScalarWhereInput[]
     id?: StringFilter<"Email"> | string
     userId?: UuidFilter<"Email"> | string
-    fromEmail?: StringFilter<"Email"> | string
-    originalSubject?: StringFilter<"Email"> | string
+    fromEmail?: StringNullableFilter<"Email"> | string | null
+    originalSubject?: StringNullableFilter<"Email"> | string | null
     summary?: StringNullableFilter<"Email"> | string | null
     category?: EnumEmailCategoryNullableFilter<"Email"> | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFilter<"Email"> | Date | string
+    status?: EnumEmailStatusNullableFilter<"Email"> | $Enums.EmailStatus | null
+    originalReceivedAt?: DateTimeNullableFilter<"Email"> | Date | string | null
     processedAt?: DateTimeFilter<"Email"> | Date | string
   }
 
@@ -13192,11 +13289,12 @@ export namespace Prisma {
 
   export type EmailCreateWithoutTasksInput = {
     id?: string
-    fromEmail: string
-    originalSubject: string
+    fromEmail?: string | null
+    originalSubject?: string | null
     summary?: string | null
     category?: $Enums.EmailCategory | null
-    originalReceivedAt: Date | string
+    status?: $Enums.EmailStatus | null
+    originalReceivedAt?: Date | string | null
     processedAt?: Date | string
     taskLogs?: TaskLogCreateNestedManyWithoutEmailInput
     events?: EventCreateNestedManyWithoutEmailInput
@@ -13207,11 +13305,12 @@ export namespace Prisma {
   export type EmailUncheckedCreateWithoutTasksInput = {
     id?: string
     userId: string
-    fromEmail: string
-    originalSubject: string
+    fromEmail?: string | null
+    originalSubject?: string | null
     summary?: string | null
     category?: $Enums.EmailCategory | null
-    originalReceivedAt: Date | string
+    status?: $Enums.EmailStatus | null
+    originalReceivedAt?: Date | string | null
     processedAt?: Date | string
     taskLogs?: TaskLogUncheckedCreateNestedManyWithoutEmailInput
     events?: EventUncheckedCreateNestedManyWithoutEmailInput
@@ -13293,11 +13392,12 @@ export namespace Prisma {
 
   export type EmailUpdateWithoutTasksInput = {
     id?: StringFieldUpdateOperationsInput | string
-    fromEmail?: StringFieldUpdateOperationsInput | string
-    originalSubject?: StringFieldUpdateOperationsInput | string
+    fromEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originalSubject?: NullableStringFieldUpdateOperationsInput | string | null
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     category?: NullableEnumEmailCategoryFieldUpdateOperationsInput | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: NullableEnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus | null
+    originalReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     taskLogs?: TaskLogUpdateManyWithoutEmailNestedInput
     events?: EventUpdateManyWithoutEmailNestedInput
@@ -13308,11 +13408,12 @@ export namespace Prisma {
   export type EmailUncheckedUpdateWithoutTasksInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    fromEmail?: StringFieldUpdateOperationsInput | string
-    originalSubject?: StringFieldUpdateOperationsInput | string
+    fromEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originalSubject?: NullableStringFieldUpdateOperationsInput | string | null
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     category?: NullableEnumEmailCategoryFieldUpdateOperationsInput | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: NullableEnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus | null
+    originalReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     taskLogs?: TaskLogUncheckedUpdateManyWithoutEmailNestedInput
     events?: EventUncheckedUpdateManyWithoutEmailNestedInput
@@ -13384,11 +13485,12 @@ export namespace Prisma {
 
   export type EmailCreateWithoutEventsInput = {
     id?: string
-    fromEmail: string
-    originalSubject: string
+    fromEmail?: string | null
+    originalSubject?: string | null
     summary?: string | null
     category?: $Enums.EmailCategory | null
-    originalReceivedAt: Date | string
+    status?: $Enums.EmailStatus | null
+    originalReceivedAt?: Date | string | null
     processedAt?: Date | string
     tasks?: TaskCreateNestedManyWithoutEmailInput
     taskLogs?: TaskLogCreateNestedManyWithoutEmailInput
@@ -13399,11 +13501,12 @@ export namespace Prisma {
   export type EmailUncheckedCreateWithoutEventsInput = {
     id?: string
     userId: string
-    fromEmail: string
-    originalSubject: string
+    fromEmail?: string | null
+    originalSubject?: string | null
     summary?: string | null
     category?: $Enums.EmailCategory | null
-    originalReceivedAt: Date | string
+    status?: $Enums.EmailStatus | null
+    originalReceivedAt?: Date | string | null
     processedAt?: Date | string
     tasks?: TaskUncheckedCreateNestedManyWithoutEmailInput
     taskLogs?: TaskLogUncheckedCreateNestedManyWithoutEmailInput
@@ -13485,11 +13588,12 @@ export namespace Prisma {
 
   export type EmailUpdateWithoutEventsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    fromEmail?: StringFieldUpdateOperationsInput | string
-    originalSubject?: StringFieldUpdateOperationsInput | string
+    fromEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originalSubject?: NullableStringFieldUpdateOperationsInput | string | null
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     category?: NullableEnumEmailCategoryFieldUpdateOperationsInput | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: NullableEnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus | null
+    originalReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tasks?: TaskUpdateManyWithoutEmailNestedInput
     taskLogs?: TaskLogUpdateManyWithoutEmailNestedInput
@@ -13500,11 +13604,12 @@ export namespace Prisma {
   export type EmailUncheckedUpdateWithoutEventsInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    fromEmail?: StringFieldUpdateOperationsInput | string
-    originalSubject?: StringFieldUpdateOperationsInput | string
+    fromEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originalSubject?: NullableStringFieldUpdateOperationsInput | string | null
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     category?: NullableEnumEmailCategoryFieldUpdateOperationsInput | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: NullableEnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus | null
+    originalReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tasks?: TaskUncheckedUpdateManyWithoutEmailNestedInput
     taskLogs?: TaskLogUncheckedUpdateManyWithoutEmailNestedInput
@@ -13562,11 +13667,12 @@ export namespace Prisma {
 
   export type EmailCreateWithoutKeyInformationInput = {
     id?: string
-    fromEmail: string
-    originalSubject: string
+    fromEmail?: string | null
+    originalSubject?: string | null
     summary?: string | null
     category?: $Enums.EmailCategory | null
-    originalReceivedAt: Date | string
+    status?: $Enums.EmailStatus | null
+    originalReceivedAt?: Date | string | null
     processedAt?: Date | string
     tasks?: TaskCreateNestedManyWithoutEmailInput
     taskLogs?: TaskLogCreateNestedManyWithoutEmailInput
@@ -13577,11 +13683,12 @@ export namespace Prisma {
   export type EmailUncheckedCreateWithoutKeyInformationInput = {
     id?: string
     userId: string
-    fromEmail: string
-    originalSubject: string
+    fromEmail?: string | null
+    originalSubject?: string | null
     summary?: string | null
     category?: $Enums.EmailCategory | null
-    originalReceivedAt: Date | string
+    status?: $Enums.EmailStatus | null
+    originalReceivedAt?: Date | string | null
     processedAt?: Date | string
     tasks?: TaskUncheckedCreateNestedManyWithoutEmailInput
     taskLogs?: TaskLogUncheckedCreateNestedManyWithoutEmailInput
@@ -13663,11 +13770,12 @@ export namespace Prisma {
 
   export type EmailUpdateWithoutKeyInformationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    fromEmail?: StringFieldUpdateOperationsInput | string
-    originalSubject?: StringFieldUpdateOperationsInput | string
+    fromEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originalSubject?: NullableStringFieldUpdateOperationsInput | string | null
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     category?: NullableEnumEmailCategoryFieldUpdateOperationsInput | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: NullableEnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus | null
+    originalReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tasks?: TaskUpdateManyWithoutEmailNestedInput
     taskLogs?: TaskLogUpdateManyWithoutEmailNestedInput
@@ -13678,11 +13786,12 @@ export namespace Prisma {
   export type EmailUncheckedUpdateWithoutKeyInformationInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    fromEmail?: StringFieldUpdateOperationsInput | string
-    originalSubject?: StringFieldUpdateOperationsInput | string
+    fromEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originalSubject?: NullableStringFieldUpdateOperationsInput | string | null
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     category?: NullableEnumEmailCategoryFieldUpdateOperationsInput | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: NullableEnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus | null
+    originalReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tasks?: TaskUncheckedUpdateManyWithoutEmailNestedInput
     taskLogs?: TaskLogUncheckedUpdateManyWithoutEmailNestedInput
@@ -13928,11 +14037,12 @@ export namespace Prisma {
 
   export type EmailCreateWithoutTaskLogsInput = {
     id?: string
-    fromEmail: string
-    originalSubject: string
+    fromEmail?: string | null
+    originalSubject?: string | null
     summary?: string | null
     category?: $Enums.EmailCategory | null
-    originalReceivedAt: Date | string
+    status?: $Enums.EmailStatus | null
+    originalReceivedAt?: Date | string | null
     processedAt?: Date | string
     tasks?: TaskCreateNestedManyWithoutEmailInput
     events?: EventCreateNestedManyWithoutEmailInput
@@ -13943,11 +14053,12 @@ export namespace Prisma {
   export type EmailUncheckedCreateWithoutTaskLogsInput = {
     id?: string
     userId: string
-    fromEmail: string
-    originalSubject: string
+    fromEmail?: string | null
+    originalSubject?: string | null
     summary?: string | null
     category?: $Enums.EmailCategory | null
-    originalReceivedAt: Date | string
+    status?: $Enums.EmailStatus | null
+    originalReceivedAt?: Date | string | null
     processedAt?: Date | string
     tasks?: TaskUncheckedCreateNestedManyWithoutEmailInput
     events?: EventUncheckedCreateNestedManyWithoutEmailInput
@@ -13999,11 +14110,12 @@ export namespace Prisma {
 
   export type EmailUpdateWithoutTaskLogsInput = {
     id?: StringFieldUpdateOperationsInput | string
-    fromEmail?: StringFieldUpdateOperationsInput | string
-    originalSubject?: StringFieldUpdateOperationsInput | string
+    fromEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originalSubject?: NullableStringFieldUpdateOperationsInput | string | null
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     category?: NullableEnumEmailCategoryFieldUpdateOperationsInput | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: NullableEnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus | null
+    originalReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tasks?: TaskUpdateManyWithoutEmailNestedInput
     events?: EventUpdateManyWithoutEmailNestedInput
@@ -14014,11 +14126,12 @@ export namespace Prisma {
   export type EmailUncheckedUpdateWithoutTaskLogsInput = {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
-    fromEmail?: StringFieldUpdateOperationsInput | string
-    originalSubject?: StringFieldUpdateOperationsInput | string
+    fromEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originalSubject?: NullableStringFieldUpdateOperationsInput | string | null
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     category?: NullableEnumEmailCategoryFieldUpdateOperationsInput | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: NullableEnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus | null
+    originalReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tasks?: TaskUncheckedUpdateManyWithoutEmailNestedInput
     events?: EventUncheckedUpdateManyWithoutEmailNestedInput
@@ -14060,11 +14173,12 @@ export namespace Prisma {
 
   export type EmailCreateManyUserInput = {
     id?: string
-    fromEmail: string
-    originalSubject: string
+    fromEmail?: string | null
+    originalSubject?: string | null
     summary?: string | null
     category?: $Enums.EmailCategory | null
-    originalReceivedAt: Date | string
+    status?: $Enums.EmailStatus | null
+    originalReceivedAt?: Date | string | null
     processedAt?: Date | string
   }
 
@@ -14112,11 +14226,12 @@ export namespace Prisma {
 
   export type EmailUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    fromEmail?: StringFieldUpdateOperationsInput | string
-    originalSubject?: StringFieldUpdateOperationsInput | string
+    fromEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originalSubject?: NullableStringFieldUpdateOperationsInput | string | null
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     category?: NullableEnumEmailCategoryFieldUpdateOperationsInput | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: NullableEnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus | null
+    originalReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tasks?: TaskUpdateManyWithoutEmailNestedInput
     taskLogs?: TaskLogUpdateManyWithoutEmailNestedInput
@@ -14126,11 +14241,12 @@ export namespace Prisma {
 
   export type EmailUncheckedUpdateWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    fromEmail?: StringFieldUpdateOperationsInput | string
-    originalSubject?: StringFieldUpdateOperationsInput | string
+    fromEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originalSubject?: NullableStringFieldUpdateOperationsInput | string | null
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     category?: NullableEnumEmailCategoryFieldUpdateOperationsInput | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: NullableEnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus | null
+    originalReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     tasks?: TaskUncheckedUpdateManyWithoutEmailNestedInput
     taskLogs?: TaskLogUncheckedUpdateManyWithoutEmailNestedInput
@@ -14140,11 +14256,12 @@ export namespace Prisma {
 
   export type EmailUncheckedUpdateManyWithoutUserInput = {
     id?: StringFieldUpdateOperationsInput | string
-    fromEmail?: StringFieldUpdateOperationsInput | string
-    originalSubject?: StringFieldUpdateOperationsInput | string
+    fromEmail?: NullableStringFieldUpdateOperationsInput | string | null
+    originalSubject?: NullableStringFieldUpdateOperationsInput | string | null
     summary?: NullableStringFieldUpdateOperationsInput | string | null
     category?: NullableEnumEmailCategoryFieldUpdateOperationsInput | $Enums.EmailCategory | null
-    originalReceivedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: NullableEnumEmailStatusFieldUpdateOperationsInput | $Enums.EmailStatus | null
+    originalReceivedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     processedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 

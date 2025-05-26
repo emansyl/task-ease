@@ -134,6 +134,7 @@ exports.Prisma.EmailScalarFieldEnum = {
   originalSubject: 'originalSubject',
   summary: 'summary',
   category: 'category',
+  status: 'status',
   originalReceivedAt: 'originalReceivedAt',
   processedAt: 'processedAt'
 };
@@ -219,6 +220,12 @@ exports.EmailCategory = exports.$Enums.EmailCategory = {
   Personal_Finance: 'Personal_Finance',
   General_Announcement: 'General_Announcement',
   Other: 'Other'
+};
+
+exports.EmailStatus = exports.$Enums.EmailStatus = {
+  pending: 'pending',
+  processed: 'processed',
+  error: 'error'
 };
 
 exports.Urgency = exports.$Enums.Urgency = {

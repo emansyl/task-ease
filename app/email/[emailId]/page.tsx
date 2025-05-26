@@ -122,7 +122,7 @@ async function getProcessedEmailData(
       details: {
         subject: emailWithRelations.originalSubject,
         from: emailWithRelations.fromEmail,
-        received_at: emailWithRelations.originalReceivedAt.toISOString(),
+        received_at: emailWithRelations.originalReceivedAt?.toISOString() || "",
       },
       processedAt: emailWithRelations.processedAt.toISOString(),
       tasks: mappedTasks,

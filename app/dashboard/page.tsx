@@ -81,7 +81,7 @@ async function getDashboardData(userId: string): Promise<DashboardData | null> {
         originalSubject: email.originalSubject,
         fromEmail: email.fromEmail,
         category: email.category ? email.category.replace(/_/g, " ") : "Other",
-        originalReceivedAt: email.originalReceivedAt.toISOString(),
+        originalReceivedAt: email.originalReceivedAt?.toISOString() || "",
         processedAt: email.processedAt.toISOString(),
         taskCount: email._count.tasks,
         eventCount: email._count.events,
