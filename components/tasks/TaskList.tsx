@@ -13,7 +13,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TaskStatus, Urgency } from "@prisma/client";
 import { ListChecks, Filter, AlertTriangle, Search } from "lucide-react";
 import {
   startOfDay,
@@ -25,6 +24,8 @@ import {
   isAfter,
   isEqual,
 } from "date-fns";
+import { Urgency } from "@/app/generated/prisma";
+import { TaskStatus } from "@/app/generated/prisma";
 
 interface TaskListProps {
   initialTasks: UITask[];

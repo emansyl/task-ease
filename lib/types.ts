@@ -1,4 +1,4 @@
-import { TaskStatus } from "@prisma/client";
+import { TaskStatus } from "@/app/generated/prisma";
 
 // lib/types.ts
 export interface LinkOrAttachment {

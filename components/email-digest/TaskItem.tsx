@@ -3,7 +3,6 @@
 
 import { useState, useTransition } from "react";
 import { Task as TaskType, LinkOrAttachment } from "@/lib/types"; // Your UI Task type
-import { TaskStatus as PrismaTaskStatus } from "@prisma/client"; // Import Prisma enum
 import { formatDate, formatRelativeDate, getUrgencyColor } from "@/lib/utils";
 import { Card } from "@/components/ui/card"; // Keep Card as is or simplify visual
 import { Checkbox } from "@/components/ui/checkbox";
@@ -26,6 +25,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { toggleTaskCompletion } from "@/app/actions/taskActions"; // Import the Server Action
+import { TaskStatus } from "@/app/generated/prisma";
 
 // Re-define renderLinkOrAttachment or import from a shared util if used elsewhere
 function renderLinkOrAttachment(item: LinkOrAttachment) {
@@ -54,12 +54,11 @@ export default function TaskItem({
   initialStatus,
 }: {
   task: TaskType;
-  initialStatus?: PrismaTaskStatus;
+  initialStatus?: TaskStatus;
 }) {
   // Manage local status for immediate UI feedback, potentially synced with server
   const [isChecked, setIsChecked] = useState(
-    initialStatus === PrismaTaskStatus.complete ||
-      task.status === PrismaTaskStatus.complete
+    initialStatus === TaskStatus.complete || task.status === TaskStatus.complete
   ); // Assuming your TaskType might have status
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -73,8 +72,8 @@ export default function TaskItem({
     startTransition(async () => {
       try {
         const currentPrismaStatus = newCheckedState
-          ? PrismaTaskStatus.todo
-          : PrismaTaskStatus.complete; // Status *before* toggle
+          ? TaskStatus.todo
+          : TaskStatus.complete; // Status *before* toggle
         const result = await toggleTaskCompletion(task.id, currentPrismaStatus);
 
         if (!result.success) {
@@ -86,9 +85,7 @@ export default function TaskItem({
           // Successfully updated, revalidation will handle refreshing data from server if needed
           // Optionally, update local state if server returns updated task, though revalidatePath should handle it.
           if (result.updatedTask) {
-            setIsChecked(
-              result.updatedTask.status === PrismaTaskStatus.complete
-            );
+            setIsChecked(result.updatedTask.status === TaskStatus.complete);
           }
         }
       } catch (e) {
