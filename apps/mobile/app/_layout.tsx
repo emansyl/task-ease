@@ -1,10 +1,10 @@
-import { Stack } from "expo-router";
 import "react-native-url-polyfill/auto";
 import { useState, useEffect } from "react";
 import { supabase } from "../lib/supabase";
-import Auth from "../components/Auth";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Session } from "@supabase/supabase-js";
+import { Redirect, Stack } from "expo-router";
+import { QueryProvider } from "../providers/QueryProvider";
 
 export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null);
@@ -16,9 +16,13 @@ export default function RootLayout() {
       setLoading(false);
     });
 
-    supabase.auth.onAuthStateChange((_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
     });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   if (loading) {
@@ -31,21 +35,21 @@ export default function RootLayout() {
   }
 
   return (
-    <View style={styles.container}>
-      {session && session.user ? (
-        <Stack>
-          <Stack.Screen name="index" options={{ title: "TaskEase" }} />
-        </Stack>
-      ) : (
-        <Auth />
-      )}
-    </View>
+    <QueryProvider>
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="index" />
+      </Stack>
+    </QueryProvider>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
   loadingText: {
     textAlign: "center",
