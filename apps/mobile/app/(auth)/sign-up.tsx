@@ -47,7 +47,7 @@ export default function SignUp() {
     } else if (!session) {
       Alert.alert("Success", "Please check your inbox for email verification!");
     } else {
-      router.replace("/(tabs)");
+      router.replace("/dashboard");
     }
     setLoading(false);
   }
@@ -57,7 +57,7 @@ export default function SignUp() {
       <View style={styles.form}>
         <Text style={styles.title}>Create Account</Text>
         <Text style={styles.subtitle}>Join TaskEase today</Text>
-        
+
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
@@ -71,7 +71,7 @@ export default function SignUp() {
             selectTextOnFocus={true}
           />
         </View>
-        
+
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
@@ -85,7 +85,7 @@ export default function SignUp() {
             selectTextOnFocus={true}
           />
         </View>
-        
+
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
@@ -99,9 +99,13 @@ export default function SignUp() {
             selectTextOnFocus={true}
           />
         </View>
-        
+
         <TouchableOpacity
-          style={[styles.button, styles.primaryButton, loading && styles.disabledButton]}
+          style={[
+            styles.button,
+            styles.primaryButton,
+            loading && styles.disabledButton,
+          ]}
           disabled={loading}
           onPress={signUpWithEmail}
         >
@@ -111,9 +115,9 @@ export default function SignUp() {
             <Text style={styles.buttonText}>Create Account</Text>
           )}
         </TouchableOpacity>
-        
+
         <View style={styles.linkContainer}>
-          <Link href="/(auth)/sign-in" asChild>
+          <Link href="/sign-in" asChild>
             <TouchableOpacity>
               <Text style={styles.linkText}>
                 Already have an account? Sign In

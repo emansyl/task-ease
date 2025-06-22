@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -9,17 +9,17 @@ import {
   Clipboard,
   Linking,
   ActivityIndicator,
-} from 'react-native';
-import { supabase } from '../../lib/supabase';
-import { Session } from '@supabase/supabase-js';
-import { router } from 'expo-router';
-import { useUser } from '../../hooks/useApi';
-import { Ionicons } from '@expo/vector-icons';
+} from "react-native";
+import { supabase } from "../../lib/supabase";
+import { Session } from "@supabase/supabase-js";
+import { router } from "expo-router";
+import { useUser } from "../../hooks/useApi";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function Settings() {
   const [session, setSession] = useState<Session | null>(null);
   const [copiedEmail, setCopiedEmail] = useState(false);
-  
+
   const { data: user, isLoading: userLoading } = useUser();
 
   useEffect(() => {
@@ -38,75 +38,72 @@ export default function Settings() {
 
   const handleCopyForwardingEmail = async () => {
     try {
-      const forwardingEmail = user?.forwardingemail || `${session?.user?.id}@taskease.ai`;
+      const forwardingEmail =
+        user?.forwardingemail || `${session?.user?.id}@taskease.ai`;
       await Clipboard.setString(forwardingEmail);
       setCopiedEmail(true);
       setTimeout(() => setCopiedEmail(false), 2000);
     } catch (error) {
-      Alert.alert('Error', 'Failed to copy email address');
+      Alert.alert("Error", "Failed to copy email address");
     }
   };
 
   const handleOpenLink = (url: string) => {
     Linking.openURL(url).catch(() => {
-      Alert.alert('Error', 'Could not open link');
+      Alert.alert("Error", "Could not open link");
     });
   };
 
   const handleSignOut = async () => {
-    Alert.alert(
-      "Sign Out",
-      "Are you sure you want to sign out?",
-      [
-        {
-          text: "Cancel",
-          style: "cancel",
+    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Sign Out",
+        style: "destructive",
+        onPress: async () => {
+          const { error } = await supabase.auth.signOut();
+          if (error) {
+            Alert.alert("Error", error.message);
+          } else {
+            router.replace("/sign-in");
+          }
         },
-        {
-          text: "Sign Out",
-          style: "destructive",
-          onPress: async () => {
-            const { error } = await supabase.auth.signOut();
-            if (error) {
-              Alert.alert("Error", error.message);
-            } else {
-              router.replace("/(auth)/sign-in");
-            }
-          },
-        },
-      ]
-    );
+      },
+    ]);
   };
 
   const integrations = [
     {
-      name: 'Google Calendar',
-      description: 'Sync events with Google Calendar',
-      icon: 'calendar',
+      name: "Google Calendar",
+      description: "Sync events with Google Calendar",
+      icon: "calendar",
       comingSoon: true,
     },
     {
-      name: 'Notion',
-      description: 'Export tasks to Notion workspace',
-      icon: 'document-text',
+      name: "Notion",
+      description: "Export tasks to Notion workspace",
+      icon: "document-text",
       comingSoon: true,
     },
     {
-      name: 'Apple Calendar',
-      description: 'Sync with iPhone Calendar app',
-      icon: 'calendar-outline',
+      name: "Apple Calendar",
+      description: "Sync with iPhone Calendar app",
+      icon: "calendar-outline",
       comingSoon: true,
     },
     {
-      name: 'Todoist',
-      description: 'Import tasks from Todoist',
-      icon: 'checkmark-circle',
+      name: "Todoist",
+      description: "Import tasks from Todoist",
+      icon: "checkmark-circle",
       comingSoon: true,
     },
     {
-      name: 'Slack',
-      description: 'Get notifications in Slack',
-      icon: 'chatbubble',
+      name: "Slack",
+      description: "Get notifications in Slack",
+      icon: "chatbubble",
       comingSoon: true,
     },
   ];
@@ -121,12 +118,12 @@ export default function Settings() {
       {/* Account Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Account</Text>
-        
+
         <View style={styles.settingItem}>
           <Text style={styles.settingLabel}>Email Address</Text>
           <Text style={styles.settingValue}>{session?.user?.email}</Text>
         </View>
-        
+
         <View style={styles.settingItem}>
           <Text style={styles.settingLabel}>TaskEase Forwarding Email</Text>
           <View style={styles.forwardingEmailContainer}>
@@ -137,15 +134,15 @@ export default function Settings() {
                 {user?.forwardingemail || `${session?.user?.id}@taskease.ai`}
               </Text>
             )}
-            <TouchableOpacity 
+            <TouchableOpacity
               style={[styles.copyButton, copiedEmail && styles.copiedButton]}
               onPress={handleCopyForwardingEmail}
               disabled={userLoading}
             >
-              <Ionicons 
-                name={copiedEmail ? "checkmark" : "copy"} 
-                size={16} 
-                color="white" 
+              <Ionicons
+                name={copiedEmail ? "checkmark" : "copy"}
+                size={16}
+                color="white"
               />
               <Text style={styles.copyButtonText}>
                 {copiedEmail ? "Copied!" : "Copy"}
@@ -153,7 +150,8 @@ export default function Settings() {
             </TouchableOpacity>
           </View>
           <Text style={styles.settingDescription}>
-            Forward emails to this address to extract tasks and events automatically
+            Forward emails to this address to extract tasks and events
+            automatically
           </Text>
         </View>
       </View>
@@ -161,32 +159,36 @@ export default function Settings() {
       {/* Integrations Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Integrations</Text>
-        
+
         {integrations.map((integration, index) => (
-          <TouchableOpacity 
+          <TouchableOpacity
             key={integration.name}
             style={[
               styles.integrationItem,
-              index === integrations.length - 1 && styles.lastItem
+              index === integrations.length - 1 && styles.lastItem,
             ]}
             disabled={integration.comingSoon}
           >
             <View style={styles.integrationLeft}>
-              <View style={[
-                styles.integrationIcon,
-                integration.comingSoon && styles.integrationIconDisabled
-              ]}>
-                <Ionicons 
-                  name={integration.icon as any} 
-                  size={20} 
-                  color={integration.comingSoon ? "#ccc" : "#007AFF"} 
+              <View
+                style={[
+                  styles.integrationIcon,
+                  integration.comingSoon && styles.integrationIconDisabled,
+                ]}
+              >
+                <Ionicons
+                  name={integration.icon as any}
+                  size={20}
+                  color={integration.comingSoon ? "#ccc" : "#007AFF"}
                 />
               </View>
               <View style={styles.integrationContent}>
-                <Text style={[
-                  styles.integrationName,
-                  integration.comingSoon && styles.integrationNameDisabled
-                ]}>
+                <Text
+                  style={[
+                    styles.integrationName,
+                    integration.comingSoon && styles.integrationNameDisabled,
+                  ]}
+                >
                   {integration.name}
                 </Text>
                 <Text style={styles.integrationDescription}>
@@ -194,7 +196,7 @@ export default function Settings() {
                 </Text>
               </View>
             </View>
-            
+
             {integration.comingSoon ? (
               <View style={styles.comingSoonBadge}>
                 <Text style={styles.comingSoonText}>Coming Soon</Text>
@@ -209,10 +211,12 @@ export default function Settings() {
       {/* Help & Support Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Help & Support</Text>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => handleOpenLink('https://docs.taskease.ai/forwarding-guide')}
+          onPress={() =>
+            handleOpenLink("https://docs.taskease.ai/forwarding-guide")
+          }
         >
           <View style={styles.menuItemLeft}>
             <Ionicons name="help-circle-outline" size={20} color="#007AFF" />
@@ -220,10 +224,10 @@ export default function Settings() {
           </View>
           <Ionicons name="chevron-forward" size={20} color="#ccc" />
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => handleOpenLink('https://taskease.ai/contact')}
+          onPress={() => handleOpenLink("https://taskease.ai/contact")}
         >
           <View style={styles.menuItemLeft}>
             <Ionicons name="mail-outline" size={20} color="#007AFF" />
@@ -231,10 +235,10 @@ export default function Settings() {
           </View>
           <Ionicons name="chevron-forward" size={20} color="#ccc" />
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.menuItem, styles.lastItem]}
-          onPress={() => handleOpenLink('https://taskease.ai/feedback')}
+          onPress={() => handleOpenLink("https://taskease.ai/feedback")}
         >
           <View style={styles.menuItemLeft}>
             <Ionicons name="chatbubble-outline" size={20} color="#007AFF" />
@@ -247,10 +251,10 @@ export default function Settings() {
       {/* Legal Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Legal</Text>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={styles.menuItem}
-          onPress={() => handleOpenLink('https://taskease.ai/privacy')}
+          onPress={() => handleOpenLink("https://taskease.ai/privacy")}
         >
           <View style={styles.menuItemLeft}>
             <Ionicons name="shield-outline" size={20} color="#666" />
@@ -258,10 +262,10 @@ export default function Settings() {
           </View>
           <Ionicons name="chevron-forward" size={20} color="#ccc" />
         </TouchableOpacity>
-        
-        <TouchableOpacity 
+
+        <TouchableOpacity
           style={[styles.menuItem, styles.lastItem]}
-          onPress={() => handleOpenLink('https://taskease.ai/terms')}
+          onPress={() => handleOpenLink("https://taskease.ai/terms")}
         >
           <View style={styles.menuItemLeft}>
             <Ionicons name="document-text-outline" size={20} color="#666" />
@@ -274,12 +278,12 @@ export default function Settings() {
       {/* App Info Section */}
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>App Information</Text>
-        
+
         <View style={styles.settingItem}>
           <Text style={styles.settingLabel}>Version</Text>
           <Text style={styles.settingValue}>1.0.0 (MVP)</Text>
         </View>
-        
+
         <View style={[styles.settingItem, { marginBottom: 0 }]}>
           <Text style={styles.settingLabel}>Build</Text>
           <Text style={styles.settingValue}>2025.01.19</Text>
@@ -303,32 +307,32 @@ export default function Settings() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   header: {
     padding: 20,
     paddingTop: 60,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderBottomWidth: 1,
-    borderBottomColor: '#e1e1e1',
+    borderBottomColor: "#e1e1e1",
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   section: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     marginTop: 20,
     marginHorizontal: 16,
     borderRadius: 12,
     padding: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -339,8 +343,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 16,
   },
   settingItem: {
@@ -348,136 +352,136 @@ const styles = StyleSheet.create({
   },
   settingLabel: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
     marginBottom: 6,
-    fontWeight: '500',
+    fontWeight: "500",
   },
   settingValue: {
     fontSize: 16,
-    color: '#333',
+    color: "#333",
   },
   settingDescription: {
     fontSize: 12,
-    color: '#999',
+    color: "#999",
     marginTop: 6,
     lineHeight: 16,
   },
   forwardingEmailContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 6,
   },
   forwardingEmailValue: {
     fontSize: 16,
-    color: '#333',
+    color: "#333",
     flex: 1,
     marginRight: 12,
-    fontFamily: 'monospace',
+    fontFamily: "monospace",
   },
   copyButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#007AFF',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#007AFF",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 6,
     gap: 4,
   },
   copiedButton: {
-    backgroundColor: '#34C759',
+    backgroundColor: "#34C759",
   },
   copyButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   integrationItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: "#f0f0f0",
   },
   integrationLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   integrationIcon: {
     width: 40,
     height: 40,
     borderRadius: 8,
-    backgroundColor: '#f0f8ff',
-    justifyContent: 'center',
-    alignItems: 'center',
+    backgroundColor: "#f0f8ff",
+    justifyContent: "center",
+    alignItems: "center",
     marginRight: 12,
   },
   integrationIconDisabled: {
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   integrationContent: {
     flex: 1,
   },
   integrationName: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 2,
   },
   integrationNameDisabled: {
-    color: '#999',
+    color: "#999",
   },
   integrationDescription: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   comingSoonBadge: {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: "#f0f0f0",
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 12,
   },
   comingSoonText: {
     fontSize: 12,
-    color: '#999',
-    fontWeight: '500',
+    color: "#999",
+    fontWeight: "500",
   },
   menuItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: "#f0f0f0",
   },
   menuItemLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     flex: 1,
   },
   menuItemText: {
     fontSize: 16,
-    color: '#333',
+    color: "#333",
     marginLeft: 12,
   },
   lastItem: {
     borderBottomWidth: 0,
   },
   signOutButton: {
-    flexDirection: 'row',
-    backgroundColor: '#FF3B30',
+    flexDirection: "row",
+    backgroundColor: "#FF3B30",
     padding: 16,
     borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
     gap: 8,
   },
   signOutButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   bottomPadding: {
     height: 40,

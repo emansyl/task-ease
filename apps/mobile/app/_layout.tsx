@@ -1,29 +1,24 @@
 import "react-native-url-polyfill/auto";
-import { useState, useEffect } from "react";
-import { supabase } from "../lib/supabase";
 import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
-import { Session } from "@supabase/supabase-js";
-import { Redirect, Stack } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import { QueryProvider } from "../providers/QueryProvider";
+import { useAuth } from "../hooks/useAuth";
+import { useEffect } from "react";
 
 export default function RootLayout() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { session, loading } = useAuth();
+  const router = useRouter();
 
+  // Navigate based on auth state when session changes
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+    if (!loading) {
+      if (session) {
+        router.replace("/dashboard");
+      } else {
+        router.replace("/sign-in");
+      }
+    }
+  }, [session, loading, router]);
 
   if (loading) {
     return (

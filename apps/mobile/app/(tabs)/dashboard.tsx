@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from "react";
 import {
   View,
   Text,
@@ -7,93 +7,79 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
-} from 'react-native';
-import { supabase } from '../../lib/supabase';
-import { Session } from '@supabase/supabase-js';
-import { useDashboard, usePendingTasks, useCompleteTask } from '../../hooks/useApi';
-import { router } from 'expo-router';
-import { format, isToday, isTomorrow, parseISO } from 'date-fns';
+} from "react-native";
+import {
+  useDashboard,
+  usePendingTasks,
+  useCompleteTask,
+} from "../../hooks/useApi";
+import { Link } from "expo-router";
+import { format, isToday, isTomorrow, parseISO } from "date-fns";
+import { Ionicons } from "@expo/vector-icons";
+import { useAuth } from "../../hooks/useAuth";
 
 export default function Dashboard() {
-  const [session, setSession] = useState<Session | null>(null);
-  
-  const { 
-    data: dashboardData, 
-    isLoading: dashboardLoading, 
+  const { session } = useAuth();
+  const {
+    data: dashboardData,
+    isLoading: dashboardLoading,
     error: dashboardError,
-    refetch: refetchDashboard 
+    refetch: refetchDashboard,
   } = useDashboard();
-  
-  const { 
-    data: pendingTasks,
-    isLoading: triageLoading 
-  } = usePendingTasks();
-  
+
+  const { data: pendingTasks, isLoading: triageLoading } = usePendingTasks();
+
   const completeTaskMutation = useCompleteTask();
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   const handleCompleteTask = async (taskId: string) => {
     try {
       await completeTaskMutation.mutateAsync(taskId);
     } catch (error) {
-      console.error('Failed to complete task:', error);
+      console.error("Failed to complete task:", error);
     }
   };
 
   const formatEventTime = (startTime: string, endTime: string) => {
     const start = parseISO(startTime);
     const end = parseISO(endTime);
-    
+
     if (isToday(start)) {
-      return `Today, ${format(start, 'h:mm a')}`;
+      return `Today, ${format(start, "h:mm a")}`;
     } else if (isTomorrow(start)) {
-      return `Tomorrow, ${format(start, 'h:mm a')}`;
+      return `Tomorrow, ${format(start, "h:mm a")}`;
     } else {
-      return format(start, 'MMM d, h:mm a');
+      return format(start, "MMM d, h:mm a");
     }
   };
 
   const formatTaskDue = (dueDate: string) => {
     const due = parseISO(dueDate);
-    
+
     if (isToday(due)) {
-      return 'Due: Today';
+      return "Due: Today";
     } else if (isTomorrow(due)) {
-      return 'Due: Tomorrow';
+      return "Due: Tomorrow";
     } else {
-      return `Due: ${format(due, 'MMM d, yyyy')}`;
+      return `Due: ${format(due, "MMM d, yyyy")}`;
     }
   };
 
   const isRefreshing = dashboardLoading || triageLoading;
 
   return (
-    <ScrollView 
+    <ScrollView
       style={styles.container}
       refreshControl={
-        <RefreshControl 
-          refreshing={isRefreshing} 
-          onRefresh={refetchDashboard} 
+        <RefreshControl
+          refreshing={isRefreshing}
+          onRefresh={refetchDashboard}
         />
       }
     >
       <View style={styles.header}>
         <Text style={styles.title}>Dashboard</Text>
         <Text style={styles.subtitle}>
-          Welcome back, {session?.user?.email?.split('@')[0]}
+          Welcome back, {session?.user?.email?.split("@")[0]}
         </Text>
       </View>
 
@@ -107,31 +93,28 @@ export default function Dashboard() {
       )}
 
       {/* Triage Widget */}
-      {(pendingTasks?.length ?? 0) > 0 && (
+      {/* {(pendingTasks?.length ?? 0) > 0 && (
         <View style={styles.widget}>
           <View style={styles.widgetHeader}>
             <Text style={styles.widgetTitle}>Triage Required</Text>
           </View>
-          <TouchableOpacity 
-            style={styles.triageButton}
-            onPress={() => router.push('/triage')}
-          >
+          <Link style={styles.triageButton} href="/triage" asChild withAnchor>
             <Text style={styles.triageButtonText}>
               You have {pendingTasks?.length} new items to triage
             </Text>
-          </TouchableOpacity>
+          </Link>
         </View>
-      )}
+      )} */}
 
       {/* Upcoming Events Widget */}
       <View style={styles.widget}>
         <View style={styles.widgetHeader}>
           <Text style={styles.widgetTitle}>Upcoming Events</Text>
-          <TouchableOpacity onPress={() => router.push('/(tabs)/events')}>
+          <Link href="/(tabs)/events" asChild>
             <Text style={styles.viewAllText}>View All</Text>
-          </TouchableOpacity>
+          </Link>
         </View>
-        
+
         {dashboardLoading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="small" />
@@ -139,15 +122,25 @@ export default function Dashboard() {
         ) : dashboardData?.upcomingEvents?.length ? (
           <View style={styles.eventsList}>
             {dashboardData.upcomingEvents.slice(0, 3).map((event) => (
-              <View key={event.id} style={styles.eventItem}>
-                <Text style={styles.eventTitle}>{event.title}</Text>
-                <Text style={styles.eventTime}>
-                  {formatEventTime(event.startTime, event.endTime)}
-                </Text>
-                {event.location && (
-                  <Text style={styles.eventLocation}>{event.location}</Text>
-                )}
-              </View>
+              <Link
+                key={event.id}
+                href={`/(tabs)/events/${event.id}`}
+                asChild
+                withAnchor
+              >
+                <TouchableOpacity style={styles.eventItem}>
+                  <View style={styles.eventContent}>
+                    <Text style={styles.eventTitle}>{event.title}</Text>
+                    <Text style={styles.eventTime}>
+                      {formatEventTime(event.startTime, event.endTime)}
+                    </Text>
+                    {event.location && (
+                      <Text style={styles.eventLocation}>{event.location}</Text>
+                    )}
+                  </View>
+                  <Ionicons name="chevron-forward" size={16} color="#ccc" />
+                </TouchableOpacity>
+              </Link>
             ))}
           </View>
         ) : (
@@ -161,11 +154,11 @@ export default function Dashboard() {
       <View style={styles.widget}>
         <View style={styles.widgetHeader}>
           <Text style={styles.widgetTitle}>Tasks Due Soon</Text>
-          <TouchableOpacity onPress={() => router.push('/(tabs)/tasks')}>
+          <Link href="/(tabs)/tasks" asChild>
             <Text style={styles.viewAllText}>View All</Text>
-          </TouchableOpacity>
+          </Link>
         </View>
-        
+
         {dashboardLoading ? (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="small" />
@@ -174,33 +167,50 @@ export default function Dashboard() {
           <View style={styles.tasksList}>
             {dashboardData.tasksDueSoon.slice(0, 3).map((task) => (
               <View key={task.id} style={styles.taskItem}>
-                <TouchableOpacity 
-                  style={styles.checkbox} 
+                <TouchableOpacity
+                  style={styles.checkbox}
                   onPress={() => handleCompleteTask(task.id)}
                   disabled={completeTaskMutation.isPending}
                 >
-                  {completeTaskMutation.isPending && completeTaskMutation.variables === task.id ? (
+                  {completeTaskMutation.isPending &&
+                  completeTaskMutation.variables === task.id ? (
                     <ActivityIndicator size="small" />
                   ) : null}
                 </TouchableOpacity>
-                <View style={styles.taskContent}>
-                  <Text style={styles.taskTitle}>{task.title}</Text>
-                  {task.dueDate && (
-                    <Text style={styles.taskDue}>
-                      {formatTaskDue(task.dueDate)}
-                    </Text>
-                  )}
-                </View>
-                <View style={[
-                  styles.urgencyBadge, 
-                  task.urgency === 'high' ? styles.highUrgency : 
-                  task.urgency === 'medium' ? styles.mediumUrgency : 
-                  styles.lowUrgency
-                ]}>
+                <Link
+                  href={`/(tabs)/tasks/${task.id}`}
+                  asChild
+                  withAnchor
+                >
+                  <TouchableOpacity style={styles.taskContent}>
+                    <Text style={styles.taskTitle}>{task.title}</Text>
+                    {task.dueDate && (
+                      <Text style={styles.taskDue}>
+                        {formatTaskDue(task.dueDate)}
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </Link>
+                <View
+                  style={[
+                    styles.urgencyBadge,
+                    task.urgency === "high"
+                      ? styles.highUrgency
+                      : task.urgency === "medium"
+                        ? styles.mediumUrgency
+                        : styles.lowUrgency,
+                  ]}
+                >
                   <Text style={styles.urgencyText}>
                     {task.urgency.toUpperCase()}
                   </Text>
                 </View>
+                <Ionicons
+                  name="chevron-forward"
+                  size={16}
+                  color="#ccc"
+                  style={styles.taskChevron}
+                />
               </View>
             ))}
           </View>
@@ -217,31 +227,31 @@ export default function Dashboard() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: "#f5f5f5",
   },
   header: {
     padding: 20,
     paddingTop: 60,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderBottomWidth: 1,
-    borderBottomColor: '#e1e1e1',
+    borderBottomColor: "#e1e1e1",
   },
   title: {
     fontSize: 32,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
     marginBottom: 4,
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: "#666",
   },
   widget: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     margin: 16,
     borderRadius: 12,
     padding: 16,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOffset: {
       width: 0,
       height: 2,
@@ -251,70 +261,96 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   widgetHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 12,
   },
   widgetTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
   },
   viewAllText: {
-    color: '#007AFF',
+    color: "#007AFF",
     fontSize: 14,
   },
   triageButton: {
-    backgroundColor: '#FF9500',
+    backgroundColor: "#FF9500",
     padding: 16,
     borderRadius: 8,
-    alignItems: 'center',
+    alignItems: "center",
   },
   triageButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   eventsList: {
     gap: 12,
   },
   eventItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     padding: 12,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "transparent",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  eventContent: {
+    flex: 1,
   },
   eventTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#333',
+    fontWeight: "600",
+    color: "#333",
     marginBottom: 4,
   },
   eventTime: {
     fontSize: 14,
-    color: '#007AFF',
+    color: "#007AFF",
     marginBottom: 2,
   },
   eventLocation: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   tasksList: {
     gap: 12,
   },
   taskItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     padding: 12,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: "transparent",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
   },
   checkbox: {
     width: 20,
     height: 20,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     marginRight: 12,
   },
   taskContent: {
@@ -322,13 +358,13 @@ const styles = StyleSheet.create({
   },
   taskTitle: {
     fontSize: 16,
-    fontWeight: '500',
-    color: '#333',
+    fontWeight: "500",
+    color: "#333",
     marginBottom: 2,
   },
   taskDue: {
     fontSize: 14,
-    color: '#666',
+    color: "#666",
   },
   urgencyBadge: {
     paddingHorizontal: 8,
@@ -336,48 +372,51 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   highUrgency: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: "#FF3B30",
   },
   mediumUrgency: {
-    backgroundColor: '#FF9500',
+    backgroundColor: "#FF9500",
   },
   lowUrgency: {
-    backgroundColor: '#34C759',
+    backgroundColor: "#34C759",
   },
   urgencyText: {
-    color: 'white',
+    color: "white",
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
+  },
+  taskChevron: {
+    marginLeft: 8,
   },
   loadingContainer: {
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   emptyContainer: {
     padding: 20,
-    alignItems: 'center',
+    alignItems: "center",
   },
   emptyText: {
     fontSize: 16,
-    color: '#999',
-    fontStyle: 'italic',
+    color: "#999",
+    fontStyle: "italic",
   },
   errorWidget: {
-    backgroundColor: '#FFE6E6',
+    backgroundColor: "#FFE6E6",
     margin: 16,
     borderRadius: 12,
     padding: 16,
     borderWidth: 1,
-    borderColor: '#FFB3B3',
+    borderColor: "#FFB3B3",
   },
   errorText: {
     fontSize: 16,
-    color: '#D32F2F',
+    color: "#D32F2F",
     marginBottom: 8,
   },
   retryText: {
     fontSize: 14,
-    color: '#1976D2',
-    fontWeight: '600',
+    color: "#1976D2",
+    fontWeight: "600",
   },
 });

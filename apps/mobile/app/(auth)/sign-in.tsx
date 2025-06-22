@@ -9,12 +9,14 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { supabase } from "../../lib/supabase";
-import { Link, router } from "expo-router";
+import { Link } from "expo-router";
+import { useAuthActions } from "../../hooks/useAuthActions";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const { clearCacheAndRefetch } = useAuthActions();
 
   async function signInWithEmail() {
     if (!email || !password) {
@@ -31,7 +33,9 @@ export default function SignIn() {
     if (error) {
       Alert.alert("Sign In Error", error.message);
     } else {
-      router.replace("/(tabs)");
+      // Clear cache and refetch data on successful login
+      await clearCacheAndRefetch();
+      // Navigation will be handled by the auth state change listener in _layout.tsx
     }
     setLoading(false);
   }
@@ -41,7 +45,7 @@ export default function SignIn() {
       <View style={styles.form}>
         <Text style={styles.title}>Welcome Back</Text>
         <Text style={styles.subtitle}>Sign in to TaskEase</Text>
-        
+
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
@@ -55,7 +59,7 @@ export default function SignIn() {
             selectTextOnFocus={true}
           />
         </View>
-        
+
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.input}
@@ -69,9 +73,13 @@ export default function SignIn() {
             selectTextOnFocus={true}
           />
         </View>
-        
+
         <TouchableOpacity
-          style={[styles.button, styles.primaryButton, loading && styles.disabledButton]}
+          style={[
+            styles.button,
+            styles.primaryButton,
+            loading && styles.disabledButton,
+          ]}
           disabled={loading}
           onPress={signInWithEmail}
         >
@@ -81,12 +89,12 @@ export default function SignIn() {
             <Text style={styles.buttonText}>Sign In</Text>
           )}
         </TouchableOpacity>
-        
+
         <View style={styles.linkContainer}>
-          <Link href="/(auth)/sign-up" asChild>
+          <Link href="/sign-up" asChild>
             <TouchableOpacity>
               <Text style={styles.linkText}>
-                Don't have an account? Sign Up
+                Don&apos;t have an account? Sign Up
               </Text>
             </TouchableOpacity>
           </Link>

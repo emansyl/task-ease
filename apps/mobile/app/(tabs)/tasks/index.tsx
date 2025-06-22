@@ -9,8 +9,9 @@ import {
   RefreshControl,
   Modal,
 } from 'react-native';
-import { useTasks, useCompleteTask, useDeleteTask } from '../../hooks/useApi';
-import { Task } from '../../lib/api';
+import { useRouter } from 'expo-router';
+import { useTasks, useCompleteTask, useDeleteTask } from '../../../hooks/useApi';
+import { Task } from '../../../lib/api';
 import { format, parseISO, isToday, isTomorrow } from 'date-fns';
 import { Ionicons } from '@expo/vector-icons';
 
@@ -21,6 +22,7 @@ type FilterOption = {
 };
 
 export default function Tasks() {
+  const router = useRouter();
   const [showCompleted, setShowCompleted] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [urgencyFilter, setUrgencyFilter] = useState<string>('all');
@@ -120,7 +122,10 @@ export default function Tasks() {
         ) : null}
       </TouchableOpacity>
       
-      <View style={styles.taskContent}>
+      <TouchableOpacity 
+        style={styles.taskContent}
+        onPress={() => router.push(`/tasks/${task.id}`)}
+      >
         <Text style={[
           styles.taskTitle,
           task.status === 'complete' && styles.taskTitleCompleted
@@ -170,7 +175,7 @@ export default function Tasks() {
             </View>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
       
       <TouchableOpacity
         style={styles.deleteButton}
@@ -183,6 +188,10 @@ export default function Tasks() {
           <Ionicons name="trash-outline" size={20} color="#FF3B30" />
         )}
       </TouchableOpacity>
+      
+      <View style={styles.chevron}>
+        <Ionicons name="chevron-forward" size={20} color="#ccc" />
+      </View>
     </View>
   );
 
@@ -597,6 +606,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   deleteButton: {
+    padding: 4,
+    marginLeft: 8,
+    marginTop: 2,
+  },
+  chevron: {
     padding: 4,
     marginLeft: 8,
     marginTop: 2,

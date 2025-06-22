@@ -1,39 +1,34 @@
-import { supabase } from "../lib/supabase";
-import { Redirect } from "expo-router";
-import { useState, useEffect } from "react";
-import { Session } from "@supabase/supabase-js";
-import { ActivityIndicator, View } from "react-native";
+import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
+import { useAuth } from "../hooks/useAuth";
 
 export default function Index() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { loading } = useAuth();
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" />
-      </View>
-    );
+  // Show loading screen only while auth state is being determined
+  if (!loading) {
+    // Let the layout handle navigation once auth state is known
+    return null;
   }
 
-  if (session) {
-    return <Redirect href="/(tabs)" />;
-  }
-
-  return <Redirect href="/(auth)/sign-in" />;
+  return (
+    <View style={styles.container}>
+      <ActivityIndicator size="large" color="#007AFF" />
+      <Text style={styles.loadingText}>Loading TaskEase...</Text>
+    </View>
+  );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#fff",
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: "#666",
+    fontWeight: "500",
+  },
+});
