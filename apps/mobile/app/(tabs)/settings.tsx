@@ -15,6 +15,7 @@ import { Session } from "@supabase/supabase-js";
 import { router } from "expo-router";
 import { useUser } from "../../hooks/useApi";
 import { Ionicons } from "@expo/vector-icons";
+import { storage } from "../../lib/storage";
 
 export default function Settings() {
   const [session, setSession] = useState<Session | null>(null);
@@ -73,6 +74,34 @@ export default function Settings() {
         },
       },
     ]);
+  };
+
+  const handleResetOnboarding = async () => {
+    Alert.alert(
+      "Reset Onboarding",
+      "This will reset your onboarding status and show the onboarding screen again. Are you sure?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Reset",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await storage.resetOnboarding();
+              Alert.alert(
+                "Success",
+                "Onboarding has been reset. Please restart the app to see the onboarding screen again."
+              );
+            } catch (error) {
+              Alert.alert("Error", "Failed to reset onboarding");
+            }
+          },
+        },
+      ]
+    );
   };
 
   const integrations = [
@@ -298,6 +327,17 @@ export default function Settings() {
         </TouchableOpacity>
       </View>
 
+      {/* Reset Onboarding Section */}
+      <View style={styles.section}>
+        <TouchableOpacity
+          style={styles.resetOnboardingButton}
+          onPress={handleResetOnboarding}
+        >
+          <Ionicons name="refresh-outline" size={20} color="white" />
+          <Text style={styles.resetOnboardingButtonText}>Reset Onboarding</Text>
+        </TouchableOpacity>
+      </View>
+
       {/* Bottom Padding */}
       <View style={styles.bottomPadding} />
     </ScrollView>
@@ -479,6 +519,20 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   signOutButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  resetOnboardingButton: {
+    flexDirection: "row",
+    backgroundColor: "#007AFF",
+    padding: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  resetOnboardingButtonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "600",

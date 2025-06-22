@@ -3,24 +3,47 @@ import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { QueryProvider } from "../providers/QueryProvider";
 import { useAuth } from "../hooks/useAuth";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { storage } from "../lib/storage";
 
 export default function RootLayout() {
   const { session, loading } = useAuth();
+  const [hasCompletedOnboarding, setHasCompletedOnboarding] = useState<
+    boolean | null
+  >(null);
   const router = useRouter();
+
+  // Check onboarding completion status from local storage
+  useEffect(() => {
+    const checkOnboardingStatus = async () => {
+      try {
+        const onboardingCompleted = await storage.getOnboardingCompleted();
+        setHasCompletedOnboarding(onboardingCompleted);
+      } catch (error) {
+        console.error("Error checking onboarding status:", error);
+        setHasCompletedOnboarding(false);
+      }
+    };
+
+    checkOnboardingStatus();
+  }, []);
 
   // Navigate based on auth state when session changes
   useEffect(() => {
-    if (!loading) {
+    if (!loading && hasCompletedOnboarding !== null) {
       if (session) {
-        router.replace("/dashboard");
+        if (hasCompletedOnboarding) {
+          router.replace("/dashboard");
+        } else {
+          router.replace("/onboarding");
+        }
       } else {
         router.replace("/sign-in");
       }
     }
-  }, [session, loading, router]);
+  }, [session, loading, hasCompletedOnboarding, router]);
 
-  if (loading) {
+  if (loading || hasCompletedOnboarding === null) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" />
@@ -35,6 +58,7 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" options={{ headerShown: false }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="index" />
+        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
       </Stack>
     </QueryProvider>
   );

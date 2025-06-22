@@ -8,14 +8,17 @@ import {
   Text,
   ActivityIndicator,
 } from "react-native";
+import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
 import { supabase } from "../../lib/supabase";
 import { Link } from "expo-router";
 import { useAuthActions } from "../../hooks/useAuthActions";
+import { signInWithGoogle } from "../../lib/googleAuth";
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const { clearCacheAndRefetch } = useAuthActions();
 
   async function signInWithEmail() {
@@ -40,6 +43,20 @@ export default function SignIn() {
     setLoading(false);
   }
 
+  async function handleGoogleSignIn() {
+    setGoogleLoading(true);
+    const { error } = await signInWithGoogle();
+
+    if (error) {
+      Alert.alert("Google Sign In Error", error.message);
+    } else {
+      // Clear cache and refetch data on successful login
+      await clearCacheAndRefetch();
+      // Navigation will be handled by the auth state change listener in _layout.tsx
+    }
+    setGoogleLoading(false);
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.form}>
@@ -55,7 +72,7 @@ export default function SignIn() {
             autoCapitalize="none"
             keyboardType="email-address"
             textContentType="emailAddress"
-            editable={!loading}
+            editable={!loading && !googleLoading}
             selectTextOnFocus={true}
           />
         </View>
@@ -69,7 +86,7 @@ export default function SignIn() {
             placeholder="Password"
             autoCapitalize="none"
             textContentType="password"
-            editable={!loading}
+            editable={!loading && !googleLoading}
             selectTextOnFocus={true}
           />
         </View>
@@ -78,9 +95,9 @@ export default function SignIn() {
           style={[
             styles.button,
             styles.primaryButton,
-            loading && styles.disabledButton,
+            (loading || googleLoading) && styles.disabledButton,
           ]}
-          disabled={loading}
+          disabled={loading || googleLoading}
           onPress={signInWithEmail}
         >
           {loading ? (
@@ -89,6 +106,21 @@ export default function SignIn() {
             <Text style={styles.buttonText}>Sign In</Text>
           )}
         </TouchableOpacity>
+
+        <View style={styles.dividerContainer}>
+          <View style={styles.divider} />
+          <Text style={styles.dividerText}>or</Text>
+          <View style={styles.divider} />
+        </View>
+
+        <View style={styles.googleButtonContainer}>
+          <GoogleSigninButton
+            size={GoogleSigninButton.Size.Wide}
+            color={GoogleSigninButton.Color.Dark}
+            onPress={handleGoogleSignIn}
+            disabled={loading || googleLoading}
+          />
+        </View>
 
         <View style={styles.linkContainer}>
           <Link href="/sign-up" asChild>
@@ -164,6 +196,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "white",
+  },
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#ddd",
+  },
+  dividerText: {
+    marginHorizontal: 15,
+    color: "#666",
+    fontSize: 14,
+  },
+  googleButtonContainer: {
+    alignItems: "center",
+    marginBottom: 10,
   },
   linkContainer: {
     alignItems: "center",

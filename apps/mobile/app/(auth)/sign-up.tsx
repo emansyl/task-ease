@@ -8,14 +8,17 @@ import {
   Text,
   ActivityIndicator,
 } from "react-native";
+import { GoogleSigninButton } from "@react-native-google-signin/google-signin";
 import { supabase } from "../../lib/supabase";
 import { Link, router } from "expo-router";
+import { signInWithGoogle } from "../../lib/googleAuth";
 
 export default function SignUp() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   async function signUpWithEmail() {
     if (!email || !password || !confirmPassword) {
@@ -52,6 +55,18 @@ export default function SignUp() {
     setLoading(false);
   }
 
+  async function handleGoogleSignUp() {
+    setGoogleLoading(true);
+    const { error } = await signInWithGoogle();
+
+    if (error) {
+      Alert.alert("Google Sign Up Error", error.message);
+    } else {
+      // Navigation will be handled by the auth state change listener in _layout.tsx
+    }
+    setGoogleLoading(false);
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.form}>
@@ -67,7 +82,7 @@ export default function SignUp() {
             autoCapitalize="none"
             keyboardType="email-address"
             textContentType="emailAddress"
-            editable={!loading}
+            editable={!loading && !googleLoading}
             selectTextOnFocus={true}
           />
         </View>
@@ -81,7 +96,7 @@ export default function SignUp() {
             placeholder="Password (min. 6 characters)"
             autoCapitalize="none"
             textContentType="newPassword"
-            editable={!loading}
+            editable={!loading && !googleLoading}
             selectTextOnFocus={true}
           />
         </View>
@@ -95,7 +110,7 @@ export default function SignUp() {
             placeholder="Confirm Password"
             autoCapitalize="none"
             textContentType="newPassword"
-            editable={!loading}
+            editable={!loading && !googleLoading}
             selectTextOnFocus={true}
           />
         </View>
@@ -104,9 +119,9 @@ export default function SignUp() {
           style={[
             styles.button,
             styles.primaryButton,
-            loading && styles.disabledButton,
+            (loading || googleLoading) && styles.disabledButton,
           ]}
-          disabled={loading}
+          disabled={loading || googleLoading}
           onPress={signUpWithEmail}
         >
           {loading ? (
@@ -115,6 +130,21 @@ export default function SignUp() {
             <Text style={styles.buttonText}>Create Account</Text>
           )}
         </TouchableOpacity>
+
+        <View style={styles.dividerContainer}>
+          <View style={styles.divider} />
+          <Text style={styles.dividerText}>or</Text>
+          <View style={styles.divider} />
+        </View>
+
+        <View style={styles.googleButtonContainer}>
+          <GoogleSigninButton
+            size={GoogleSigninButton.Size.Wide}
+            color={GoogleSigninButton.Color.Dark}
+            onPress={handleGoogleSignUp}
+            disabled={loading || googleLoading}
+          />
+        </View>
 
         <View style={styles.linkContainer}>
           <Link href="/sign-in" asChild>
@@ -190,6 +220,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "white",
+  },
+  dividerContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 20,
+  },
+  divider: {
+    flex: 1,
+    height: 1,
+    backgroundColor: "#ddd",
+  },
+  dividerText: {
+    marginHorizontal: 15,
+    color: "#666",
+    fontSize: 14,
+  },
+  googleButtonContainer: {
+    alignItems: "center",
+    marginBottom: 10,
   },
   linkContainer: {
     alignItems: "center",
