@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ActivityIndicator } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { QueryProvider } from "../providers/QueryProvider";
 import { useAuth } from "../hooks/useAuth";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 import { useEffect, useState } from "react";
 import { storage } from "../lib/storage";
 
@@ -12,6 +13,13 @@ export default function RootLayout() {
     boolean | null
   >(null);
   const router = useRouter();
+
+  // Debug logging for production
+  console.log('RootLayout mounted, __DEV__:', __DEV__);
+  console.log('Environment variables loaded:', {
+    SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL ? 'present' : 'missing',
+    API_BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'not set',
+  });
 
   // Check onboarding completion status from local storage
   useEffect(() => {
@@ -53,14 +61,16 @@ export default function RootLayout() {
   }
 
   return (
-    <QueryProvider>
-      <Stack screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="index" />
-        <Stack.Screen name="onboarding" options={{ headerShown: false }} />
-      </Stack>
-    </QueryProvider>
+    <ErrorBoundary>
+      <QueryProvider>
+        <Stack screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="index" />
+          <Stack.Screen name="onboarding" options={{ headerShown: false }} />
+        </Stack>
+      </QueryProvider>
+    </ErrorBoundary>
   );
 }
 

@@ -1,7 +1,9 @@
 import { supabase } from "./supabase";
 
 // Base API configuration
-const API_BASE_URL = "http://10.0.0.63:3000"; //process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL || (__DEV__ 
+  ? "http://localhost:3000" 
+  : "https://usetaskease.com");
 
 // Types based on your Prisma schema
 export interface Task {
@@ -78,21 +80,30 @@ async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<T> {
-  const headers = await getAuthHeaders();
+  try {
+    const headers = await getAuthHeaders();
 
-  const response = await fetch(`${API_BASE_URL}/api${endpoint}`, {
-    ...options,
-    headers: {
-      ...headers,
-      ...options.headers,
-    },
-  });
+    console.log(`Making API call to: ${API_BASE_URL}/api${endpoint}`);
 
-  if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    const response = await fetch(`${API_BASE_URL}/api${endpoint}`, {
+      ...options,
+      headers: {
+        ...headers,
+        ...options.headers,
+      },
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`API Error ${response.status}:`, errorText);
+      throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`);
+    }
+
+    return response.json();
+  } catch (error) {
+    console.error(`API call failed for ${endpoint}:`, error);
+    throw error;
   }
-
-  return response.json();
 }
 
 // API functions for React Query
@@ -210,13 +221,32 @@ export const api = {
     }),
 
   // Onboarding
-  sendWelcomeEmail: (): Promise<{ success: boolean; message: string; sentTo: string }> =>
-    apiCall<{ success: boolean; message: string; sentTo: string }>("/onboarding/welcome-email", {
-      method: "POST",
-    }),
+  sendWelcomeEmail: (): Promise<{
+    success: boolean;
+    message: string;
+    sentTo: string;
+  }> =>
+    apiCall<{ success: boolean; message: string; sentTo: string }>(
+      "/onboarding/welcome-email",
+      {
+        method: "POST",
+      }
+    ),
 
-  sendSampleEmail: (): Promise<{ success: boolean; message: string; sentTo: string; forwardTo: string; instructions: string }> =>
-    apiCall<{ success: boolean; message: string; sentTo: string; forwardTo: string; instructions: string }>("/onboarding/sample-email", {
+  sendSampleEmail: (): Promise<{
+    success: boolean;
+    message: string;
+    sentTo: string;
+    forwardTo: string;
+    instructions: string;
+  }> =>
+    apiCall<{
+      success: boolean;
+      message: string;
+      sentTo: string;
+      forwardTo: string;
+      instructions: string;
+    }>("/onboarding/sample-email", {
       method: "POST",
     }),
 };
