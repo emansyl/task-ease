@@ -16,6 +16,7 @@ import { router } from "expo-router";
 import { useUser } from "../../hooks/useApi";
 import { Ionicons } from "@expo/vector-icons";
 import { storage } from "../../lib/storage";
+import { formatForwardingEmail } from "../../lib/email";
 
 export default function Settings() {
   const [session, setSession] = useState<Session | null>(null);
@@ -39,9 +40,8 @@ export default function Settings() {
 
   const handleCopyForwardingEmail = async () => {
     try {
-      const forwardingEmail =
-        user?.forwardingemail || `${session?.user?.id}@taskease.ai`;
-      await Clipboard.setString(forwardingEmail);
+      const email = formatForwardingEmail(user?.forwardingemail || session?.user?.id || "");
+      await Clipboard.setString(email);
       setCopiedEmail(true);
       setTimeout(() => setCopiedEmail(false), 2000);
     } catch (error) {
@@ -160,7 +160,7 @@ export default function Settings() {
               <ActivityIndicator size="small" color="#666" />
             ) : (
               <Text style={styles.forwardingEmailValue} numberOfLines={1}>
-                {user?.forwardingemail || `${session?.user?.id}@taskease.ai`}
+                {formatForwardingEmail(user?.forwardingemail || session?.user?.id || "")}
               </Text>
             )}
             <TouchableOpacity

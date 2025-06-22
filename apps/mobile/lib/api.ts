@@ -208,4 +208,15 @@ export const api = {
     apiCall<Task>(`/triage/tasks/${id}/approve-complete`, {
       method: "POST",
     }),
+
+  // Onboarding
+  sendWelcomeEmail: (): Promise<{ success: boolean; message: string; sentTo: string }> =>
+    apiCall<{ success: boolean; message: string; sentTo: string }>("/onboarding/welcome-email", {
+      method: "POST",
+    }),
+
+  sendSampleEmail: (): Promise<{ success: boolean; message: string; sentTo: string; forwardTo: string; instructions: string }> =>
+    apiCall<{ success: boolean; message: string; sentTo: string; forwardTo: string; instructions: string }>("/onboarding/sample-email", {
+      method: "POST",
+    }),
 };

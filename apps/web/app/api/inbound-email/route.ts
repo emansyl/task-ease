@@ -55,15 +55,18 @@ export async function POST(req: NextRequest) {
   const receivedTimestamp = new Date();
 
   const formData = (await req.formData()) as unknown as FormData;
+  console.log("formData", formData);
   const textContent = formData.get("text")?.toString() || "";
   const htmlContent = formData.get("html")?.toString() || "";
   const emailBodyToProcess = textContent || htmlContent;
 
   try {
     const toHeader = formData.get("to")?.toString() || "";
+    const ccHeader = formData.get("cc")?.toString() || "";
 
     const recipient = toHeader.toLowerCase().split(",")[0].trim();
-    const forwardingEmailUsername = recipient.split("@")[0];
+    const forwardingEmailUsernameTo = toHeader.split("@")[0];
+    const forwardingEmailUsernameCc = ccHeader.split("@")[0];
 
     if (!emailBodyToProcess) {
       console.warn("Webhook received empty email body.");
@@ -71,13 +74,18 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Empty email body" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { forwardingemail: forwardingEmailUsername },
+    const user = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { forwardingemail: forwardingEmailUsernameTo },
+          { forwardingemail: forwardingEmailUsernameCc },
+        ],
+      },
     });
 
     if (!user) {
       console.warn(
-        `No user found for forwarding email username: ${forwardingEmailUsername} (derived from ${recipient})`
+        `No user found for forwarding email username: ${forwardingEmailUsernameTo} or ${forwardingEmailUsernameCc} (derived from ${recipient})`
       );
       // Optionally create a TaskLog entry for user not found
       return NextResponse.json({ error: "User not found" }, { status: 404 });

@@ -1,4 +1,7 @@
 import sgMail from "@sendgrid/mail";
+import { render } from "@react-email/render";
+import { WelcomeEmail } from "../components/emails/WelcomeEmail";
+import { SampleEmail } from "../components/emails/SampleEmail";
 
 sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
@@ -75,4 +78,75 @@ function formatSummaryHTML(summary: string, tasks: any[]) {
       </p>
     </div>
   `;
+}
+
+export async function sendWelcomeEmail({
+  to,
+  userName,
+  userEmail,
+  forwardingEmail,
+}: {
+  to: string;
+  userName: string;
+  userEmail: string;
+  forwardingEmail: string;
+}) {
+  try {
+    const htmlBody = await render(
+      WelcomeEmail({
+        userName,
+        userEmail,
+        forwardingEmail,
+      })
+    );
+
+    await sgMail.send({
+      to,
+      cc: forwardingEmail, // Automatically forward for AI processing
+      from: "TaskEase AI <noreply@em7150.usetaskease.com>",
+      subject: "🎉 Welcome to TaskEase - Your AI Assistant is Ready!",
+      html: htmlBody,
+    });
+
+    console.log("Welcome email sent successfully to:", to);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to send welcome email:", error);
+    if (error.response) {
+      console.error(error.response.body);
+    }
+    return { success: false, error: error.message };
+  }
+}
+
+export async function sendSampleEmail({
+  to,
+  userName,
+}: {
+  to: string;
+  userName: string;
+}) {
+  try {
+    const htmlBody = render(
+      SampleEmail({
+        userName,
+      })
+    );
+
+    await sgMail.send({
+      to,
+      from: "TaskEase Demo <demo@em7150.usetaskease.com>",
+      subject: "Project Update and Upcoming Deadlines - Action Required",
+      html: await htmlBody,
+    });
+
+    console.log("Sample email sent successfully to:", to);
+    return { success: true };
+  } catch (error: any) {
+    console.error("Failed to send sample email:", error);
+    if (error.response) {
+      console.error(error.response.body);
+    }
+    return { success: false, error: error.message };
+  }
 }

@@ -16,10 +16,12 @@ export const signInWithGoogle = async () => {
 
     // Sign in with Google
     const userInfo = await GoogleSignin.signIn();
+    console.log("userInfo", userInfo);
 
     // Access the ID token from the response
-    const idToken =
-      (userInfo as any).idToken || (userInfo as any).user?.idToken;
+    const idToken = userInfo.data?.idToken;
+
+    console.log("idToken", idToken);
 
     if (idToken) {
       // Sign in to Supabase with the ID token

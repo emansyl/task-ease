@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -7,24 +7,55 @@ import {
   ActivityIndicator,
   Clipboard,
   ScrollView,
+  Alert,
 } from "react-native";
 import { router } from "expo-router";
 import { useUser } from "../hooks/useApi";
 import { Ionicons } from "@expo/vector-icons";
 import { storage } from "../lib/storage";
+import { useAuth } from "../hooks/useAuth";
+import { api } from "../lib/api";
+import { formatForwardingEmail } from "../lib/email";
 
 export default function Onboarding() {
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [showGuide, setShowGuide] = useState(false);
   const [isCompletingOnboarding, setIsCompletingOnboarding] = useState(false);
+  const [isSendingSampleEmail, setIsSendingSampleEmail] = useState(false);
+  const [welcomeEmailSent, setWelcomeEmailSent] = useState(false);
+  const [isLoadingWelcomeEmail, setIsLoadingWelcomeEmail] = useState(false);
 
   const { data: user, isLoading: userLoading } = useUser();
+  const { session } = useAuth();
+
+  // Send welcome email when component mounts (user first sees onboarding)
+  useEffect(() => {
+    const sendWelcomeEmailOnMount = async () => {
+      // Only send if user data is loaded and we haven't sent it yet
+      if (!userLoading && user && !welcomeEmailSent && !isLoadingWelcomeEmail) {
+        try {
+          setIsLoadingWelcomeEmail(true);
+          console.log("Sending welcome email automatically on onboarding page load...");
+          
+          await api.sendWelcomeEmail();
+          setWelcomeEmailSent(true);
+          console.log("Welcome email sent successfully on page load");
+        } catch (error) {
+          console.error("Failed to send welcome email on page load:", error);
+          // Don't show error to user - this is background functionality
+        } finally {
+          setIsLoadingWelcomeEmail(false);
+        }
+      }
+    };
+
+    sendWelcomeEmailOnMount();
+  }, [user, userLoading, welcomeEmailSent, isLoadingWelcomeEmail]);
 
   const handleCopyForwardingEmail = async () => {
     try {
-      const forwardingEmail =
-        user?.forwardingemail || `${user?.id}@taskease.ai`;
-      await Clipboard.setString(forwardingEmail);
+      const email = formatForwardingEmail(user?.forwardingemail || user?.id || "");
+      await Clipboard.setString(email);
       setCopiedEmail(true);
       setTimeout(() => setCopiedEmail(false), 3000);
     } catch (error) {
@@ -35,6 +66,30 @@ export default function Onboarding() {
   const handleOpenGuide = () => {
     // If external link fails, show in-app guide
     setShowGuide(true);
+  };
+
+
+  const handleSendSampleEmail = async () => {
+    try {
+      setIsSendingSampleEmail(true);
+      
+      const response = await api.sendSampleEmail();
+      
+      Alert.alert(
+        "Sample Email Sent! 🧪",
+        `Check your email (${session?.user?.email}) and forward the sample email to your TaskEase address to test the extraction process.\n\nForward to: ${forwardingEmail}${welcomeEmailSent ? '\n\n💡 Your welcome email has already been processed - check your dashboard for sample data!' : ''}`,
+        [{ text: "Got it!" }]
+      );
+    } catch (error) {
+      console.error("Failed to send sample email:", error);
+      Alert.alert(
+        "Error",
+        "Failed to send sample email. Please try again.",
+        [{ text: "OK" }]
+      );
+    } finally {
+      setIsSendingSampleEmail(false);
+    }
   };
 
   const handleContinueToDashboard = async () => {
@@ -54,7 +109,7 @@ export default function Onboarding() {
     }
   };
 
-  const forwardingEmail = user?.forwardingemail || `${user?.id}@taskease.ai`;
+  const forwardingEmail = formatForwardingEmail(user?.forwardingemail || user?.id || "");
 
   if (userLoading) {
     return (
@@ -254,6 +309,73 @@ export default function Onboarding() {
             </View>
           </View>
         </View>
+      </View>
+
+      {/* Email Setup Section */}
+      <View style={styles.card}>
+        <View style={styles.cardHeader}>
+          <View style={styles.cardIcon}>
+            <Ionicons name="mail-open" size={24} color="#007AFF" />
+          </View>
+          <Text style={styles.cardTitle}>Test TaskEase Now</Text>
+        </View>
+
+        <Text style={styles.cardDescription}>
+          Want to see how TaskEase works before setting up email forwarding? Send yourself a sample email to test!
+        </Text>
+
+        <TouchableOpacity
+          style={[
+            styles.sampleEmailButton,
+            isSendingSampleEmail && styles.emailButtonLoading,
+          ]}
+          onPress={handleSendSampleEmail}
+          disabled={isSendingSampleEmail}
+        >
+          {isSendingSampleEmail ? (
+            <ActivityIndicator size="small" color="#007AFF" />
+          ) : (
+            <>
+              <Ionicons name="flask" size={20} color="#007AFF" />
+              <Text style={styles.sampleEmailButtonText}>Send Sample Email to Test</Text>
+            </>
+          )}
+        </TouchableOpacity>
+
+        <Text style={styles.emailHintText}>
+          💡 Forward the sample email to your TaskEase address to see AI extraction in action
+        </Text>
+      </View>
+
+      {/* Welcome Email Status */}
+      <View style={[styles.infoCard, welcomeEmailSent && styles.infoCardSuccess]}>
+        <View style={styles.infoHeader}>
+          {isLoadingWelcomeEmail ? (
+            <ActivityIndicator size={20} color="#007AFF" />
+          ) : (
+            <Ionicons 
+              name={welcomeEmailSent ? "checkmark-circle" : "gift"} 
+              size={20} 
+              color={welcomeEmailSent ? "#34C759" : "#007AFF"} 
+            />
+          )}
+          <Text style={[styles.infoTitle, welcomeEmailSent && styles.infoTitleSuccess]}>
+            {isLoadingWelcomeEmail 
+              ? "Sending Welcome Email..." 
+              : welcomeEmailSent 
+                ? "Welcome Email Sent!" 
+                : "Preparing Welcome Email..."
+            }
+          </Text>
+        </View>
+        <Text style={styles.infoText}>
+          {isLoadingWelcomeEmail 
+            ? "Our AI is preparing your sample tasks and events..."
+            : welcomeEmailSent 
+              ? "Check your email and dashboard! Your sample tasks and events are being processed right now."
+              : "We're sending you a welcome email that gets processed by our AI. You'll see sample tasks and events appear in your dashboard!"
+          }
+        </Text>
       </View>
 
       {/* Action Buttons */}
@@ -500,5 +622,66 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     marginBottom: 8,
     paddingLeft: 8,
+  },
+  sampleEmailButton: {
+    flexDirection: "row",
+    backgroundColor: "white",
+    borderWidth: 2,
+    borderColor: "#007AFF",
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    borderRadius: 12,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  emailButtonLoading: {
+    backgroundColor: "#f0f0f0",
+    borderColor: "#ccc",
+  },
+  sampleEmailButtonText: {
+    color: "#007AFF",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  emailHintText: {
+    fontSize: 14,
+    color: "#666",
+    textAlign: "center",
+    fontStyle: "italic",
+    lineHeight: 20,
+    marginTop: 12,
+  },
+  infoCard: {
+    backgroundColor: "#f0fff4",
+    borderWidth: 1,
+    borderColor: "#c6f6d5",
+    margin: 16,
+    borderRadius: 12,
+    padding: 16,
+  },
+  infoCardSuccess: {
+    backgroundColor: "#f0f9ff",
+    borderColor: "#bfdbfe",
+  },
+  infoHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+    gap: 8,
+  },
+  infoTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#22543d",
+  },
+  infoTitleSuccess: {
+    color: "#1e40af",
+  },
+  infoText: {
+    fontSize: 14,
+    color: "#2d5016",
+    lineHeight: 20,
   },
 });
