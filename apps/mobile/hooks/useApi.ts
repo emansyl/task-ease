@@ -1,17 +1,17 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { api, Task, Event, User, DashboardData } from '../lib/api';
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { api, Task, Event } from "../lib/api";
 
 // Query Keys
 export const queryKeys = {
-  user: ['user'] as const,
-  dashboard: ['dashboard'] as const,
-  tasks: ['tasks'] as const,
-  task: (id: string) => ['tasks', id] as const,
-  events: ['events'] as const,
-  event: (id: string) => ['events', id] as const,
-  emails: ['emails'] as const,
-  email: (id: string) => ['emails', id] as const,
-  triage: ['triage'] as const,
+  user: ["user"] as const,
+  dashboard: ["dashboard"] as const,
+  tasks: ["tasks"] as const,
+  task: (id: string) => ["tasks", id] as const,
+  events: ["events"] as const,
+  event: (id: string) => ["events", id] as const,
+  emails: ["emails"] as const,
+  email: (id: string) => ["emails", id] as const,
+  triage: ["triage"] as const,
 } as const;
 
 // User hooks
@@ -24,7 +24,7 @@ export function useUser() {
 
 export function useUpdateUser() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.updateProfile,
     onSuccess: (data) => {
@@ -61,7 +61,7 @@ export function useTask(id: string) {
 
 export function useCreateTask() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.createTask,
     onSuccess: () => {
@@ -73,7 +73,7 @@ export function useCreateTask() {
 
 export function useUpdateTask() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<Task> }) =>
       api.updateTask(id, updates),
@@ -87,7 +87,7 @@ export function useUpdateTask() {
 
 export function useDeleteTask() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.deleteTask,
     onSuccess: (_, id) => {
@@ -100,7 +100,7 @@ export function useDeleteTask() {
 
 export function useCompleteTask() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.completeTask,
     onSuccess: (data, id) => {
@@ -130,7 +130,7 @@ export function useEvent(id: string) {
 
 export function useCreateEvent() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.createEvent,
     onSuccess: () => {
@@ -142,7 +142,7 @@ export function useCreateEvent() {
 
 export function useUpdateEvent() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: ({ id, updates }: { id: string; updates: Partial<Event> }) =>
       api.updateEvent(id, updates),
@@ -156,7 +156,7 @@ export function useUpdateEvent() {
 
 export function useDeleteEvent() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.deleteEvent,
     onSuccess: (_, id) => {
@@ -195,7 +195,7 @@ export function usePendingTasks() {
 
 export function useApproveTask() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.approveTask,
     onSuccess: () => {
@@ -208,7 +208,7 @@ export function useApproveTask() {
 
 export function useRejectTask() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.rejectTask,
     onSuccess: () => {
@@ -220,7 +220,7 @@ export function useRejectTask() {
 
 export function useApproveAndCompleteTask() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: api.approveAndCompleteTask,
     onSuccess: () => {
