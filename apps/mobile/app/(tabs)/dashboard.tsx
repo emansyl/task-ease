@@ -177,11 +177,7 @@ export default function Dashboard() {
                     <ActivityIndicator size="small" />
                   ) : null}
                 </TouchableOpacity>
-                <Link
-                  href={`/(tabs)/tasks/${task.id}`}
-                  asChild
-                  withAnchor
-                >
+                <Link href={`/(tabs)/tasks/${task.id}`} asChild withAnchor>
                   <TouchableOpacity style={styles.taskContent}>
                     <Text style={styles.taskTitle}>{task.title}</Text>
                     {task.dueDate && (

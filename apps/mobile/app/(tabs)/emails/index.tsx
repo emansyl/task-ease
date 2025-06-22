@@ -27,7 +27,7 @@ export default function Emails() {
   const formatEmailDate = (dateString: string) => {
     try {
       const date = parseISO(dateString);
-      
+
       if (isToday(date)) {
         return `Today, ${format(date, "h:mm a")}`;
       } else if (isTomorrow(date)) {
@@ -49,7 +49,7 @@ export default function Emails() {
         icon: "time-outline" as const,
       };
     }
-    
+
     if (email.status === "processed") {
       return {
         label: "Processed",
@@ -58,7 +58,7 @@ export default function Emails() {
         icon: "checkmark-circle-outline" as const,
       };
     }
-    
+
     if (email.status === "error") {
       return {
         label: "Error",
@@ -76,24 +76,29 @@ export default function Emails() {
     };
   };
 
-  const filteredEmails = emails?.filter(email => {
-    if (statusFilter === "all") return true;
-    if (statusFilter === "processed") return email.status === "processed";
-    if (statusFilter === "pending") return !email.status || email.status === "pending";
-    if (statusFilter === "error") return email.status === "error";
-    return true;
-  }) || [];
+  const filteredEmails =
+    emails?.filter((email) => {
+      if (statusFilter === "all") return true;
+      if (statusFilter === "processed") return email.status === "processed";
+      if (statusFilter === "pending")
+        return !email.status || email.status === "pending";
+      if (statusFilter === "error") return email.status === "error";
+      return true;
+    }) || [];
 
   const getFilterCounts = () => {
     if (!emails) return { all: 0, processed: 0, pending: 0, error: 0 };
-    
-    return emails.reduce((counts, email) => {
-      counts.all++;
-      if (email.status === "processed") counts.processed++;
-      else if (email.status === "error") counts.error++;
-      else counts.pending++;
-      return counts;
-    }, { all: 0, processed: 0, pending: 0, error: 0 });
+
+    return emails.reduce(
+      (counts, email) => {
+        counts.all++;
+        if (email.status === "processed") counts.processed++;
+        else if (email.status === "error") counts.error++;
+        else counts.pending++;
+        return counts;
+      },
+      { all: 0, processed: 0, pending: 0, error: 0 }
+    );
   };
 
   const filterCounts = getFilterCounts();
@@ -114,7 +119,12 @@ export default function Emails() {
             <Text style={styles.emailSubject} numberOfLines={1}>
               {email.originalSubject || "No Subject"}
             </Text>
-            <View style={[styles.statusBadge, { backgroundColor: status.backgroundColor }]}>
+            <View
+              style={[
+                styles.statusBadge,
+                { backgroundColor: status.backgroundColor },
+              ]}
+            >
               <Ionicons name={status.icon} size={12} color={status.color} />
               <Text style={[styles.statusText, { color: status.color }]}>
                 {status.label}
@@ -127,12 +137,11 @@ export default function Emails() {
               From: {email.fromEmail || "Unknown"}
             </Text>
             <Text style={styles.emailDate}>
-              {email.originalReceivedAt 
+              {email.originalReceivedAt
                 ? formatEmailDate(email.originalReceivedAt)
-                : email.processedAt 
-                ? formatEmailDate(email.processedAt)
-                : "Unknown date"
-              }
+                : email.processedAt
+                  ? formatEmailDate(email.processedAt)
+                  : "Unknown date"}
             </Text>
           </View>
 
@@ -145,19 +154,29 @@ export default function Emails() {
           <View style={styles.extractionInfo}>
             {tasksCount > 0 && (
               <View style={styles.extractionItem}>
-                <Ionicons name="checkmark-circle-outline" size={16} color="#007AFF" />
-                <Text style={styles.extractionText}>{tasksCount} task{tasksCount !== 1 ? 's' : ''}</Text>
+                <Ionicons
+                  name="checkmark-circle-outline"
+                  size={16}
+                  color="#007AFF"
+                />
+                <Text style={styles.extractionText}>
+                  {tasksCount} task{tasksCount !== 1 ? "s" : ""}
+                </Text>
               </View>
             )}
             {eventsCount > 0 && (
               <View style={styles.extractionItem}>
                 <Ionicons name="calendar-outline" size={16} color="#007AFF" />
-                <Text style={styles.extractionText}>{eventsCount} event{eventsCount !== 1 ? 's' : ''}</Text>
+                <Text style={styles.extractionText}>
+                  {eventsCount} event{eventsCount !== 1 ? "s" : ""}
+                </Text>
               </View>
             )}
-            {tasksCount === 0 && eventsCount === 0 && email.status === "processed" && (
-              <Text style={styles.noExtractionText}>No items extracted</Text>
-            )}
+            {tasksCount === 0 &&
+              eventsCount === 0 &&
+              email.status === "processed" && (
+                <Text style={styles.noExtractionText}>No items extracted</Text>
+              )}
           </View>
         </View>
 
@@ -183,12 +202,17 @@ export default function Emails() {
         <View style={styles.modalContent}>
           <Text style={styles.filterSectionTitle}>Status</Text>
 
-          {([
-            { key: "all", label: `All Emails (${filterCounts.all})` },
-            { key: "processed", label: `Processed (${filterCounts.processed})` },
-            { key: "pending", label: `Processing (${filterCounts.pending})` },
-            { key: "error", label: `Errors (${filterCounts.error})` },
-          ] as const).map((filter) => (
+          {(
+            [
+              { key: "all", label: `All Emails (${filterCounts.all})` },
+              {
+                key: "processed",
+                label: `Processed (${filterCounts.processed})`,
+              },
+              { key: "pending", label: `Processing (${filterCounts.pending})` },
+              { key: "error", label: `Errors (${filterCounts.error})` },
+            ] as const
+          ).map((filter) => (
             <TouchableOpacity
               key={filter.key}
               style={[
@@ -203,7 +227,8 @@ export default function Emails() {
               <Text
                 style={[
                   styles.filterOptionText,
-                  statusFilter === filter.key && styles.filterOptionTextSelected,
+                  statusFilter === filter.key &&
+                    styles.filterOptionTextSelected,
                 ]}
               >
                 {filter.label}
@@ -243,7 +268,8 @@ export default function Emails() {
       <View style={styles.header}>
         <Text style={styles.title}>Emails</Text>
         <Text style={styles.subtitle}>
-          {filteredEmails.length} {filteredEmails.length === 1 ? "email" : "emails"}
+          {filteredEmails.length}{" "}
+          {filteredEmails.length === 1 ? "email" : "emails"}
         </Text>
       </View>
 
@@ -254,9 +280,13 @@ export default function Emails() {
         >
           <Ionicons name="filter" size={20} color="#007AFF" />
           <Text style={styles.filterButtonText}>
-            {statusFilter === "all" ? "All" : 
-             statusFilter === "processed" ? "Processed" :
-             statusFilter === "pending" ? "Processing" : "Errors"}
+            {statusFilter === "all"
+              ? "All"
+              : statusFilter === "processed"
+                ? "Processed"
+                : statusFilter === "pending"
+                  ? "Processing"
+                  : "Errors"}
           </Text>
           <Ionicons name="chevron-down" size={16} color="#007AFF" />
         </TouchableOpacity>

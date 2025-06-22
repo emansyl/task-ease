@@ -1,7 +1,7 @@
 import { supabase } from "./supabase";
 
 // Base API configuration
-const API_BASE_URL = "http://localhost:3001"; //process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = "http://10.0.0.63:3000"; //process.env.EXPO_PUBLIC_API_BASE_URL || 'http://localhost:3000';
 
 // Types based on your Prisma schema
 export interface Task {

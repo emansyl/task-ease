@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, Task, Event } from "../lib/api";
+import { api, Task, Event, Email } from "../lib/api";
 
 // Query Keys
 export const queryKeys = {
@@ -45,17 +45,23 @@ export function useDashboard() {
 // Task hooks
 export function useTasks(filter?: { status?: string; urgency?: string }) {
   return useQuery({
-    queryKey: [...queryKeys.tasks, filter],
+    queryKey: queryKeys.tasks,
     queryFn: () => api.getTasks(filter),
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 }
 
 export function useTask(id: string) {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: queryKeys.task(id),
     queryFn: () => api.getTask(id),
     enabled: !!id,
+    initialData: () => {
+      const tasks = queryClient.getQueryData<Task[]>(["tasks"]);
+      return tasks?.find((task: Task) => task.id === id);
+    },
   });
 }
 
@@ -114,17 +120,23 @@ export function useCompleteTask() {
 // Event hooks
 export function useEvents(filter?: { startDate?: string; endDate?: string }) {
   return useQuery({
-    queryKey: [...queryKeys.events, filter],
+    queryKey: [queryKeys.events],
     queryFn: () => api.getEvents(filter),
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 }
 
 export function useEvent(id: string) {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: queryKeys.event(id),
     queryFn: () => api.getEvent(id),
     enabled: !!id,
+    initialData: () => {
+      const events = queryClient.getQueryData<Event[]>(["events"]);
+      return events?.find((event: Event) => event.id === id);
+    },
   });
 }
 
@@ -170,17 +182,23 @@ export function useDeleteEvent() {
 // Email hooks
 export function useEmails(limit?: number) {
   return useQuery({
-    queryKey: [...queryKeys.emails, { limit }],
+    queryKey: [queryKeys.emails],
     queryFn: () => api.getEmails(limit),
     staleTime: 10 * 60 * 1000, // 10 minutes
   });
 }
 
 export function useEmail(id: string) {
+  const queryClient = useQueryClient();
+
   return useQuery({
     queryKey: queryKeys.email(id),
     queryFn: () => api.getEmail(id),
     enabled: !!id,
+    initialData: () => {
+      const emails = queryClient.getQueryData<Email[]>(["emails"]);
+      return emails?.find((email: Email) => email.id === id);
+    },
   });
 }
 

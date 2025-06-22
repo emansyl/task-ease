@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
   let aiResponseData: Partial<ExtractedEmailData> = {};
   const receivedTimestamp = new Date();
 
-  const formData = await req.formData();
+  const formData = (await req.formData()) as unknown as FormData;
   const textContent = formData.get("text")?.toString() || "";
   const htmlContent = formData.get("html")?.toString() || "";
   const emailBodyToProcess = textContent || htmlContent;

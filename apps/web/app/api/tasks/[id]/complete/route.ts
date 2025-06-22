@@ -4,10 +4,11 @@ import { getUserIdFromRequest } from "@/lib/auth";
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = await getUserIdFromRequest(request);
+    const { id } = await params;
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -15,7 +16,7 @@ export async function POST(
 
     const completedTask = await prisma.task.update({
       where: {
-        id: params.id,
+        id: id,
         userId: userId,
       },
       data: {

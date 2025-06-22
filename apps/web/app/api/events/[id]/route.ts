@@ -4,10 +4,11 @@ import { getUserIdFromRequest } from "@/lib/auth";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = await getUserIdFromRequest(request);
+    const { id } = await params;
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -15,7 +16,7 @@ export async function GET(
 
     const event = await prisma.event.findFirst({
       where: {
-        id: params.id,
+        id: id,
         userId: userId,
       },
       include: {
@@ -58,10 +59,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = await getUserIdFromRequest(request);
+    const { id } = await params;
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -111,7 +113,7 @@ export async function PUT(
 
     const updatedEvent = await prisma.event.update({
       where: {
-        id: params.id,
+        id: id,
         userId: userId,
       },
       data: updateData,
@@ -157,10 +159,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const userId = await getUserIdFromRequest(request);
+    const { id } = await params;
 
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -168,7 +171,7 @@ export async function DELETE(
 
     await prisma.event.delete({
       where: {
-        id: params.id,
+        id: id,
         userId: userId,
       },
     });

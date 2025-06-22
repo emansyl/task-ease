@@ -78,7 +78,6 @@ export default function Events() {
     }
   };
 
-
   const filteredEvents =
     events?.filter((event) => {
       const eventStart = parseISO(event.startTime);
@@ -147,7 +146,6 @@ export default function Events() {
       <Ionicons name="chevron-forward" size={20} color="#ccc" />
     </TouchableOpacity>
   );
-
 
   const renderFilterModal = () => (
     <Modal
