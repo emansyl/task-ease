@@ -14,11 +14,20 @@ export default function RootLayout() {
   >(null);
   const router = useRouter();
 
-  // Debug logging for production
+  // Debug logging for production with safety checks
   console.log('RootLayout mounted, __DEV__:', __DEV__);
+  
+  // Validate critical environment variables
+  const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
+  const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
+  
+  if (!supabaseUrl) {
+    console.error('CRITICAL: EXPO_PUBLIC_SUPABASE_URL is missing');
+  }
+  
   console.log('Environment variables loaded:', {
-    SUPABASE_URL: process.env.EXPO_PUBLIC_SUPABASE_URL ? 'present' : 'missing',
-    API_BASE_URL: process.env.EXPO_PUBLIC_API_BASE_URL || 'not set',
+    SUPABASE_URL: supabaseUrl ? 'present' : 'missing',
+    API_BASE_URL: apiBaseUrl || 'using fallback',
   });
 
   // Check onboarding completion status from local storage
@@ -39,13 +48,19 @@ export default function RootLayout() {
   // Navigate based on auth state when session changes
   useEffect(() => {
     if (!loading && hasCompletedOnboarding !== null) {
-      if (session) {
-        if (hasCompletedOnboarding) {
-          router.replace("/dashboard");
+      try {
+        if (session) {
+          if (hasCompletedOnboarding) {
+            router.replace("/dashboard");
+          } else {
+            router.replace("/onboarding");
+          }
         } else {
-          router.replace("/onboarding");
+          router.replace("/sign-in");
         }
-      } else {
+      } catch (error) {
+        console.error("Navigation error:", error);
+        // Fallback navigation
         router.replace("/sign-in");
       }
     }
