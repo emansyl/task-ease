@@ -30,24 +30,24 @@ export default function RootLayout() {
     API_BASE_URL: apiBaseUrl || "using fallback",
   });
 
-  // Check onboarding completion status from local storage
-  useEffect(() => {
-    const checkOnboardingStatus = async () => {
-      try {
-        const onboardingCompleted = await storage.getOnboardingCompleted();
-        setHasCompletedOnboarding(onboardingCompleted);
-      } catch (error) {
-        console.error("Error checking onboarding status:", error);
-        setHasCompletedOnboarding(false);
-      }
-    };
+  // // Check onboarding completion status from local storage
+  // useEffect(() => {
+  //   const checkOnboardingStatus = async () => {
+  //     try {
+  //       const onboardingCompleted = await storage.getOnboardingCompleted();
+  //       setHasCompletedOnboarding(onboardingCompleted);
+  //     } catch (error) {
+  //       console.error("Error checking onboarding status:", error);
+  //       setHasCompletedOnboarding(false);
+  //     }
+  //   };
 
-    checkOnboardingStatus();
-  }, []);
+  //   checkOnboardingStatus();
+  // }, []);
 
   // Navigate based on auth state when session changes
   useEffect(() => {
-    if (!loading && hasCompletedOnboarding !== null) {
+    if (!loading) {
       try {
         if (session) {
           // if (hasCompletedOnboarding) {
