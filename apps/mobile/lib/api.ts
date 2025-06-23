@@ -2,6 +2,10 @@ import { supabase } from "./supabase";
 
 // Base API configuration with validation
 function getApiBaseUrl(): string {
+  // Fallback logic
+  if (__DEV__) {
+    return "http://localhost:3000";
+  }
   const envUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
 
   if (envUrl) {
@@ -12,11 +16,6 @@ function getApiBaseUrl(): string {
     } catch {
       console.error("Invalid EXPO_PUBLIC_API_BASE_URL:", envUrl);
     }
-  }
-
-  // Fallback logic
-  if (__DEV__) {
-    return "http://localhost:3000";
   }
 
   // Production fallback
@@ -105,7 +104,7 @@ async function apiCall<T>(
     const headers = await getAuthHeaders();
     if (!headers) {
       console.warn(`Skipping API call to ${endpoint} due to missing auth`);
-      return Promise.reject(new Error("Not authenticated"));
+      return null;
     }
 
     console.log(`Making API call to: ${API_BASE_URL}/api${endpoint}`);

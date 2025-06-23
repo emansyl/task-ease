@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -12,47 +12,275 @@ import Clipboard from "@react-native-clipboard/clipboard";
 import { router } from "expo-router";
 import { useUser } from "../hooks/useApi";
 import { Ionicons } from "@expo/vector-icons";
-import { storage } from "../lib/storage";
 import { useAuth } from "../providers/AuthProvider";
 import { api } from "../lib/api";
 import { formatForwardingEmail } from "../lib/email";
 
+// Types
+type OnboardingState = {
+  copiedEmail: boolean;
+  showGuide: boolean;
+  isCompletingOnboarding: boolean;
+  isSendingSampleEmail: boolean;
+};
+
+// Card Component
+const Card = ({
+  icon,
+  title,
+  description,
+  children,
+}: {
+  icon: string;
+  title: string;
+  description?: string;
+  children?: React.ReactNode;
+}) => (
+  <View style={styles.card}>
+    <View style={styles.cardHeader}>
+      <View style={styles.cardIcon}>
+        <Ionicons name={icon as any} size={24} color="#007AFF" />
+      </View>
+      <Text style={styles.cardTitle}>{title}</Text>
+    </View>
+    {description && <Text style={styles.cardDescription}>{description}</Text>}
+    {children}
+  </View>
+);
+
+// Email Setup Card
+const EmailSetupCard = ({
+  forwardingEmail,
+  copiedEmail,
+  onCopy,
+}: {
+  forwardingEmail: string;
+  copiedEmail: boolean;
+  onCopy: () => void;
+}) => (
+  <Card
+    icon="mail"
+    title="Your Unique Forwarding Email"
+    description="Forward emails to this address and TaskEase will automatically extract tasks and events for you."
+  >
+    <View style={styles.emailContainer}>
+      <View style={styles.emailBox}>
+        <Text style={styles.emailText} numberOfLines={1}>
+          {forwardingEmail}
+        </Text>
+      </View>
+
+      <TouchableOpacity
+        style={[styles.copyButton, copiedEmail && styles.copiedButton]}
+        onPress={onCopy}
+      >
+        <Ionicons
+          name={copiedEmail ? "checkmark" : "copy"}
+          size={16}
+          color="white"
+        />
+        <Text style={styles.copyButtonText}>
+          {copiedEmail ? "Copied!" : "Copy"}
+        </Text>
+      </TouchableOpacity>
+    </View>
+
+    {copiedEmail && (
+      <View style={styles.successMessage}>
+        <Ionicons name="checkmark-circle" size={16} color="#34C759" />
+        <Text style={styles.successText}>
+          Email address copied to clipboard!
+        </Text>
+      </View>
+    )}
+  </Card>
+);
+
+// How It Works Card
+const HowItWorksCard = () => {
+  const steps = [
+    {
+      title: "Forward Emails",
+      description: "Set up email forwarding to your TaskEase address",
+    },
+    {
+      title: "AI Analyzes",
+      description: "Our AI extracts tasks, events, and important information",
+    },
+    {
+      title: "Stay Organized",
+      description: "Review and manage everything in your Dashboard",
+    },
+  ];
+
+  return (
+    <Card icon="information-circle" title="How it works">
+      <View style={styles.stepsList}>
+        {steps.map((step, index) => (
+          <View key={index} style={styles.stepItem}>
+            <View style={styles.stepNumber}>
+              <Text style={styles.stepNumberText}>{index + 1}</Text>
+            </View>
+            <View style={styles.stepContent}>
+              <Text style={styles.stepTitle}>{step.title}</Text>
+              <Text style={styles.stepDescription}>{step.description}</Text>
+            </View>
+          </View>
+        ))}
+      </View>
+    </Card>
+  );
+};
+
+// Test Email Card
+const TestEmailCard = ({
+  isSendingSampleEmail,
+  onSendSampleEmail,
+}: {
+  isSendingSampleEmail: boolean;
+  onSendSampleEmail: () => void;
+}) => (
+  <Card
+    icon="mail-open"
+    title="Test TaskEase Now"
+    description="Want to see how TaskEase works before setting up email forwarding? Send yourself a sample email to test!"
+  >
+    <TouchableOpacity
+      style={[
+        styles.sampleEmailButton,
+        isSendingSampleEmail && styles.emailButtonLoading,
+      ]}
+      onPress={onSendSampleEmail}
+      disabled={isSendingSampleEmail}
+    >
+      {isSendingSampleEmail ? (
+        <ActivityIndicator size="small" color="#007AFF" />
+      ) : (
+        <>
+          <Ionicons name="flask" size={20} color="#007AFF" />
+          <Text style={styles.sampleEmailButtonText}>
+            Send Sample Email to Test
+          </Text>
+        </>
+      )}
+    </TouchableOpacity>
+
+    <Text style={styles.emailHintText}>
+      💡 Forward the sample email to your TaskEase address to see AI extraction
+      in action
+    </Text>
+  </Card>
+);
+
+// Guide Component
+const EmailForwardingGuide = ({
+  forwardingEmail,
+  onBack,
+  onContinue,
+  isCompletingOnboarding,
+}: {
+  forwardingEmail: string;
+  onBack: () => void;
+  onContinue: () => void;
+  isCompletingOnboarding: boolean;
+}) => (
+  <ScrollView style={styles.container}>
+    <View style={styles.header}>
+      <TouchableOpacity onPress={onBack}>
+        <Ionicons name="arrow-back" size={24} color="#333" />
+      </TouchableOpacity>
+      <Text style={styles.headerTitle}>Email Forwarding Guide</Text>
+      <View style={styles.headerRight} />
+    </View>
+
+    <View style={styles.guideContent}>
+      <View style={styles.guideSection}>
+        <Text style={styles.guideSectionTitle}>📧 Gmail Instructions</Text>
+        <Text style={styles.guideStep}>
+          1. Open Gmail and click the gear icon → &quot;See all settings&quot;
+        </Text>
+        <Text style={styles.guideStep}>
+          2. Go to &quot;Forwarding and POP/IMAP&quot; tab
+        </Text>
+        <Text style={styles.guideStep}>
+          3. Click &quot;Add a forwarding address&quot;
+        </Text>
+        <Text style={styles.guideStep}>4. Enter: {forwardingEmail}</Text>
+        <Text style={styles.guideStep}>
+          5. Click &quot;Next&quot; and follow verification steps
+        </Text>
+        <Text style={styles.guideStep}>
+          6. Select &quot;Forward a copy of incoming mail to&quot; and choose
+          your TaskEase address
+        </Text>
+      </View>
+
+      <View style={styles.guideSection}>
+        <Text style={styles.guideSectionTitle}>
+          📱 iPhone Mail Instructions
+        </Text>
+        <Text style={styles.guideStep}>1. Open Settings → Mail → Rules</Text>
+        <Text style={styles.guideStep}>2. Tap &quot;Add Rule&quot;</Text>
+        <Text style={styles.guideStep}>
+          3. Set conditions for emails you want to forward
+        </Text>
+        <Text style={styles.guideStep}>
+          4. Choose &quot;Forward Message&quot;
+        </Text>
+        <Text style={styles.guideStep}>5. Enter: {forwardingEmail}</Text>
+      </View>
+
+      <View style={styles.guideSection}>
+        <Text style={styles.guideSectionTitle}>🔄 What Happens Next?</Text>
+        <Text style={styles.guideStep}>
+          • TaskEase AI will analyze your forwarded emails
+        </Text>
+        <Text style={styles.guideStep}>
+          • Tasks and events are automatically extracted
+        </Text>
+        <Text style={styles.guideStep}>
+          • You&apos;ll get notifications to review new items
+        </Text>
+        <Text style={styles.guideStep}>
+          • Everything appears in your Dashboard
+        </Text>
+      </View>
+
+      <TouchableOpacity
+        style={[
+          styles.primaryButton,
+          isCompletingOnboarding && styles.disabledButton,
+        ]}
+        onPress={onContinue}
+        disabled={isCompletingOnboarding}
+      >
+        {isCompletingOnboarding ? (
+          <ActivityIndicator size="small" color="white" />
+        ) : (
+          <Text style={styles.primaryButtonText}>
+            Got it! Continue to Dashboard
+          </Text>
+        )}
+      </TouchableOpacity>
+    </View>
+  </ScrollView>
+);
+
+// Main Component
 export default function Onboarding() {
-  const [copiedEmail, setCopiedEmail] = useState(false);
-  const [showGuide, setShowGuide] = useState(false);
-  const [isCompletingOnboarding, setIsCompletingOnboarding] = useState(false);
-  const [isSendingSampleEmail, setIsSendingSampleEmail] = useState(false);
-  const [welcomeEmailSent, setWelcomeEmailSent] = useState(false);
-  const [isLoadingWelcomeEmail, setIsLoadingWelcomeEmail] = useState(false);
+  const [state, setState] = useState<OnboardingState>({
+    copiedEmail: false,
+    showGuide: false,
+    isCompletingOnboarding: false,
+    isSendingSampleEmail: false,
+  });
 
   const { data: user, isLoading: userLoading } = useUser();
-  const { session } = useAuth();
+  const { session, setOnboardingCompleted } = useAuth();
 
-  // Send welcome email when component mounts (user first sees onboarding)
-  useEffect(() => {
-    const sendWelcomeEmailOnMount = async () => {
-      // Only send if user data is loaded and we haven't sent it yet
-      if (!userLoading && user && !welcomeEmailSent && !isLoadingWelcomeEmail) {
-        try {
-          setIsLoadingWelcomeEmail(true);
-          console.log(
-            "Sending welcome email automatically on onboarding page load..."
-          );
-
-          await api.sendWelcomeEmail();
-          setWelcomeEmailSent(true);
-          console.log("Welcome email sent successfully on page load");
-        } catch (error) {
-          console.error("Failed to send welcome email on page load:", error);
-          // Don't show error to user - this is background functionality
-        } finally {
-          setIsLoadingWelcomeEmail(false);
-        }
-      }
-    };
-
-    sendWelcomeEmailOnMount();
-  }, [user, userLoading, welcomeEmailSent, isLoadingWelcomeEmail]);
+  const updateState = (updates: Partial<OnboardingState>) => {
+    setState((prev) => ({ ...prev, ...updates }));
+  };
 
   const handleCopyForwardingEmail = async () => {
     try {
@@ -60,27 +288,26 @@ export default function Onboarding() {
         user?.forwardingemail || user?.id || ""
       );
       await Clipboard.setString(email);
-      setCopiedEmail(true);
-      setTimeout(() => setCopiedEmail(false), 3000);
+      updateState({ copiedEmail: true });
+      setTimeout(() => updateState({ copiedEmail: false }), 3000);
     } catch (error) {
       console.error("Failed to copy email address:", error);
     }
   };
 
-  const handleOpenGuide = () => {
-    // If external link fails, show in-app guide
-    setShowGuide(true);
-  };
-
   const handleSendSampleEmail = async () => {
     try {
-      setIsSendingSampleEmail(true);
+      updateState({ isSendingSampleEmail: true });
 
       await api.sendSampleEmail();
 
+      const forwardingEmail = formatForwardingEmail(
+        user?.forwardingemail || user?.id || ""
+      );
+
       Alert.alert(
         "Sample Email Sent! 🧪",
-        `Check your email (${session?.user?.email}) and forward the sample email to your TaskEase address to test the extraction process.\n\nForward to: ${forwardingEmail}${welcomeEmailSent ? "\n\n💡 Your welcome email has already been processed - check your dashboard for sample data!" : ""}`,
+        `Check your email (${session?.user?.email}) and forward the sample email to your TaskEase address to test the extraction process.\n\nForward to: ${forwardingEmail}`,
         [{ text: "Got it!" }]
       );
     } catch (error) {
@@ -89,24 +316,20 @@ export default function Onboarding() {
         { text: "OK" },
       ]);
     } finally {
-      setIsSendingSampleEmail(false);
+      updateState({ isSendingSampleEmail: false });
     }
   };
 
   const handleContinueToDashboard = async () => {
     try {
-      setIsCompletingOnboarding(true);
-
-      // Mark onboarding as completed in local storage
-      await storage.setOnboardingCompleted(true);
-      // Navigate to dashboard
+      updateState({ isCompletingOnboarding: true });
+      setOnboardingCompleted(true);
       router.replace("/");
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
-      // Still navigate to dashboard even if storage fails
       router.replace("/");
     } finally {
-      setIsCompletingOnboarding(false);
+      updateState({ isCompletingOnboarding: false });
     }
   };
 
@@ -123,91 +346,14 @@ export default function Onboarding() {
     );
   }
 
-  if (showGuide) {
+  if (state.showGuide) {
     return (
-      <ScrollView style={styles.container}>
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => setShowGuide(false)}>
-            <Ionicons name="arrow-back" size={24} color="#333" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Email Forwarding Guide</Text>
-          <View style={styles.headerRight} />
-        </View>
-
-        <View style={styles.guideContent}>
-          <View style={styles.guideSection}>
-            <Text style={styles.guideSectionTitle}>📧 Gmail Instructions</Text>
-            <Text style={styles.guideStep}>
-              1. Open Gmail and click the gear icon → &quot;See all
-              settings&quot;
-            </Text>
-            <Text style={styles.guideStep}>
-              2. Go to &quot;Forwarding and POP/IMAP&quot; tab
-            </Text>
-            <Text style={styles.guideStep}>
-              3. Click &quot;Add a forwarding address&quot;
-            </Text>
-            <Text style={styles.guideStep}>4. Enter: {forwardingEmail}</Text>
-            <Text style={styles.guideStep}>
-              5. Click &quot;Next&quot; and follow verification steps
-            </Text>
-            <Text style={styles.guideStep}>
-              6. Select &quot;Forward a copy of incoming mail to&quot; and
-              choose your TaskEase address
-            </Text>
-          </View>
-
-          <View style={styles.guideSection}>
-            <Text style={styles.guideSectionTitle}>
-              📱 iPhone Mail Instructions
-            </Text>
-            <Text style={styles.guideStep}>
-              1. Open Settings → Mail → Rules
-            </Text>
-            <Text style={styles.guideStep}>2. Tap &quot;Add Rule&quot;</Text>
-            <Text style={styles.guideStep}>
-              3. Set conditions for emails you want to forward
-            </Text>
-            <Text style={styles.guideStep}>
-              4. Choose &quot;Forward Message&quot;
-            </Text>
-            <Text style={styles.guideStep}>5. Enter: {forwardingEmail}</Text>
-          </View>
-
-          <View style={styles.guideSection}>
-            <Text style={styles.guideSectionTitle}>🔄 What Happens Next?</Text>
-            <Text style={styles.guideStep}>
-              • TaskEase AI will analyze your forwarded emails
-            </Text>
-            <Text style={styles.guideStep}>
-              • Tasks and events are automatically extracted
-            </Text>
-            <Text style={styles.guideStep}>
-              • You&apos;ll get notifications to review new items
-            </Text>
-            <Text style={styles.guideStep}>
-              • Everything appears in your Dashboard
-            </Text>
-          </View>
-
-          <TouchableOpacity
-            style={[
-              styles.primaryButton,
-              isCompletingOnboarding && styles.disabledButton,
-            ]}
-            onPress={handleContinueToDashboard}
-            disabled={isCompletingOnboarding}
-          >
-            {isCompletingOnboarding ? (
-              <ActivityIndicator size="small" color="white" />
-            ) : (
-              <Text style={styles.primaryButtonText}>
-                Got it! Continue to Dashboard
-              </Text>
-            )}
-          </TouchableOpacity>
-        </View>
-      </ScrollView>
+      <EmailForwardingGuide
+        forwardingEmail={forwardingEmail}
+        onBack={() => updateState({ showGuide: false })}
+        onContinue={handleContinueToDashboard}
+        isCompletingOnboarding={state.isCompletingOnboarding}
+      />
     );
   }
 
@@ -220,181 +366,23 @@ export default function Onboarding() {
         </Text>
       </View>
 
-      {/* Email Setup Card */}
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <View style={styles.cardIcon}>
-            <Ionicons name="mail" size={24} color="#007AFF" />
-          </View>
-          <Text style={styles.cardTitle}>Your Unique Forwarding Email</Text>
-        </View>
+      <EmailSetupCard
+        forwardingEmail={forwardingEmail}
+        copiedEmail={state.copiedEmail}
+        onCopy={handleCopyForwardingEmail}
+      />
 
-        <Text style={styles.cardDescription}>
-          Forward emails to this address and TaskEase will automatically extract
-          tasks and events for you.
-        </Text>
+      <HowItWorksCard />
 
-        <View style={styles.emailContainer}>
-          <View style={styles.emailBox}>
-            <Text style={styles.emailText} numberOfLines={1}>
-              {forwardingEmail}
-            </Text>
-          </View>
+      <TestEmailCard
+        isSendingSampleEmail={state.isSendingSampleEmail}
+        onSendSampleEmail={handleSendSampleEmail}
+      />
 
-          <TouchableOpacity
-            style={[styles.copyButton, copiedEmail && styles.copiedButton]}
-            onPress={handleCopyForwardingEmail}
-          >
-            <Ionicons
-              name={copiedEmail ? "checkmark" : "copy"}
-              size={16}
-              color="white"
-            />
-            <Text style={styles.copyButtonText}>
-              {copiedEmail ? "Copied!" : "Copy"}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {copiedEmail && (
-          <View style={styles.successMessage}>
-            <Ionicons name="checkmark-circle" size={16} color="#34C759" />
-            <Text style={styles.successText}>
-              Email address copied to clipboard!
-            </Text>
-          </View>
-        )}
-      </View>
-
-      {/* How it Works Card */}
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <View style={styles.cardIcon}>
-            <Ionicons name="information-circle" size={24} color="#007AFF" />
-          </View>
-          <Text style={styles.cardTitle}>How it works</Text>
-        </View>
-
-        <View style={styles.stepsList}>
-          <View style={styles.stepItem}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>1</Text>
-            </View>
-            <View style={styles.stepContent}>
-              <Text style={styles.stepTitle}>Forward Emails</Text>
-              <Text style={styles.stepDescription}>
-                Set up email forwarding to your TaskEase address
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.stepItem}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>2</Text>
-            </View>
-            <View style={styles.stepContent}>
-              <Text style={styles.stepTitle}>AI Analyzes</Text>
-              <Text style={styles.stepDescription}>
-                Our AI extracts tasks, events, and important information
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.stepItem}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>3</Text>
-            </View>
-            <View style={styles.stepContent}>
-              <Text style={styles.stepTitle}>Stay Organized</Text>
-              <Text style={styles.stepDescription}>
-                Review and manage everything in your Dashboard
-              </Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      {/* Email Setup Section */}
-      <View style={styles.card}>
-        <View style={styles.cardHeader}>
-          <View style={styles.cardIcon}>
-            <Ionicons name="mail-open" size={24} color="#007AFF" />
-          </View>
-          <Text style={styles.cardTitle}>Test TaskEase Now</Text>
-        </View>
-
-        <Text style={styles.cardDescription}>
-          Want to see how TaskEase works before setting up email forwarding?
-          Send yourself a sample email to test!
-        </Text>
-
-        <TouchableOpacity
-          style={[
-            styles.sampleEmailButton,
-            isSendingSampleEmail && styles.emailButtonLoading,
-          ]}
-          onPress={handleSendSampleEmail}
-          disabled={isSendingSampleEmail}
-        >
-          {isSendingSampleEmail ? (
-            <ActivityIndicator size="small" color="#007AFF" />
-          ) : (
-            <>
-              <Ionicons name="flask" size={20} color="#007AFF" />
-              <Text style={styles.sampleEmailButtonText}>
-                Send Sample Email to Test
-              </Text>
-            </>
-          )}
-        </TouchableOpacity>
-
-        <Text style={styles.emailHintText}>
-          💡 Forward the sample email to your TaskEase address to see AI
-          extraction in action
-        </Text>
-      </View>
-
-      {/* Welcome Email Status */}
-      <View
-        style={[styles.infoCard, welcomeEmailSent && styles.infoCardSuccess]}
-      >
-        <View style={styles.infoHeader}>
-          {isLoadingWelcomeEmail ? (
-            <ActivityIndicator size={20} color="#007AFF" />
-          ) : (
-            <Ionicons
-              name={welcomeEmailSent ? "checkmark-circle" : "gift"}
-              size={20}
-              color={welcomeEmailSent ? "#34C759" : "#007AFF"}
-            />
-          )}
-          <Text
-            style={[
-              styles.infoTitle,
-              welcomeEmailSent && styles.infoTitleSuccess,
-            ]}
-          >
-            {isLoadingWelcomeEmail
-              ? "Sending Welcome Email..."
-              : welcomeEmailSent
-                ? "Welcome Email Sent!"
-                : "Preparing Welcome Email..."}
-          </Text>
-        </View>
-        <Text style={styles.infoText}>
-          {isLoadingWelcomeEmail
-            ? "Our AI is preparing your sample tasks and events..."
-            : welcomeEmailSent
-              ? "Check your email and dashboard! Your sample tasks and events are being processed right now."
-              : "We're sending you a welcome email that gets processed by our AI. You'll see sample tasks and events appear in your dashboard!"}
-        </Text>
-      </View>
-
-      {/* Action Buttons */}
       <View style={styles.actionsContainer}>
         <TouchableOpacity
           style={styles.secondaryButton}
-          onPress={handleOpenGuide}
+          onPress={() => updateState({ showGuide: true })}
         >
           <Ionicons name="book-outline" size={20} color="#007AFF" />
           <Text style={styles.secondaryButtonText}>How-to Guide</Text>
@@ -403,12 +391,12 @@ export default function Onboarding() {
         <TouchableOpacity
           style={[
             styles.primaryButton,
-            isCompletingOnboarding && styles.disabledButton,
+            state.isCompletingOnboarding && styles.disabledButton,
           ]}
           onPress={handleContinueToDashboard}
-          disabled={isCompletingOnboarding}
+          disabled={state.isCompletingOnboarding}
         >
-          {isCompletingOnboarding ? (
+          {state.isCompletingOnboarding ? (
             <ActivityIndicator size="small" color="white" />
           ) : (
             <Text style={styles.primaryButtonText}>Continue to Dashboard</Text>
@@ -664,36 +652,5 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
     lineHeight: 20,
     marginTop: 12,
-  },
-  infoCard: {
-    backgroundColor: "#f0fff4",
-    borderWidth: 1,
-    borderColor: "#c6f6d5",
-    margin: 16,
-    borderRadius: 12,
-    padding: 16,
-  },
-  infoCardSuccess: {
-    backgroundColor: "#f0f9ff",
-    borderColor: "#bfdbfe",
-  },
-  infoHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 8,
-    gap: 8,
-  },
-  infoTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#22543d",
-  },
-  infoTitleSuccess: {
-    color: "#1e40af",
-  },
-  infoText: {
-    fontSize: 14,
-    color: "#2d5016",
-    lineHeight: 20,
   },
 });
