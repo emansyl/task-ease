@@ -50,7 +50,7 @@ export default function SignUp() {
     } else if (!session) {
       Alert.alert("Success", "Please check your inbox for email verification!");
     } else {
-      router.replace("/dashboard");
+      router.replace("/");
     }
     setLoading(false);
   }

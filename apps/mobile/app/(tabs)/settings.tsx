@@ -6,10 +6,10 @@ import {
   TouchableOpacity,
   Alert,
   ScrollView,
-  Clipboard,
   Linking,
   ActivityIndicator,
 } from "react-native";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { supabase } from "../../lib/supabase";
 import { Session } from "@supabase/supabase-js";
 import { router } from "expo-router";
@@ -40,11 +40,14 @@ export default function Settings() {
 
   const handleCopyForwardingEmail = async () => {
     try {
-      const email = formatForwardingEmail(user?.forwardingemail || session?.user?.id || "");
+      const email = formatForwardingEmail(
+        user?.forwardingemail || session?.user?.id || ""
+      );
       await Clipboard.setString(email);
       setCopiedEmail(true);
       setTimeout(() => setCopiedEmail(false), 2000);
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Failed to copy email address:", error);
       Alert.alert("Error", "Failed to copy email address");
     }
   };
@@ -95,7 +98,8 @@ export default function Settings() {
                 "Success",
                 "Onboarding has been reset. Please restart the app to see the onboarding screen again."
               );
-            } catch (error) {
+            } catch (error: any) {
+              console.error("Failed to reset onboarding:", error);
               Alert.alert("Error", "Failed to reset onboarding");
             }
           },
@@ -160,7 +164,9 @@ export default function Settings() {
               <ActivityIndicator size="small" color="#666" />
             ) : (
               <Text style={styles.forwardingEmailValue} numberOfLines={1}>
-                {formatForwardingEmail(user?.forwardingemail || session?.user?.id || "")}
+                {formatForwardingEmail(
+                  user?.forwardingemail || session?.user?.id || ""
+                )}
               </Text>
             )}
             <TouchableOpacity

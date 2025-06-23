@@ -113,14 +113,14 @@ export default function SignIn() {
           <View style={styles.divider} />
         </View>
 
-        {/* <View style={styles.googleButtonContainer}>
+        <View style={styles.googleButtonContainer}>
           <GoogleSigninButton
             size={GoogleSigninButton.Size.Wide}
             color={GoogleSigninButton.Color.Dark}
             onPress={handleGoogleSignIn}
             disabled={loading || googleLoading}
           />
-        </View> */}
+        </View>
 
         <View style={styles.linkContainer}>
           <Link href="/sign-up" asChild>

@@ -3,22 +3,22 @@ import { supabase } from "./supabase";
 // Base API configuration with validation
 function getApiBaseUrl(): string {
   const envUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
-  
+
   if (envUrl) {
     // Validate the URL format
     try {
       new URL(envUrl);
       return envUrl;
     } catch {
-      console.error('Invalid EXPO_PUBLIC_API_BASE_URL:', envUrl);
+      console.error("Invalid EXPO_PUBLIC_API_BASE_URL:", envUrl);
     }
   }
-  
+
   // Fallback logic
   if (__DEV__) {
     return "http://localhost:3000";
   }
-  
+
   // Production fallback
   return "https://usetaskease.com";
 }
@@ -120,26 +120,32 @@ async function apiCall<T>(
     clearTimeout(timeoutId);
 
     if (!response.ok) {
-      let errorText = 'Unknown error';
+      let errorText = "Unknown error";
       try {
         errorText = await response.text();
       } catch {
         // Ignore JSON parsing errors
       }
       console.error(`API Error ${response.status}:`, errorText);
-      throw new Error(`API Error: ${response.status} ${response.statusText} - ${errorText}`);
+      throw new Error(
+        `API Error: ${response.status} ${response.statusText} - ${errorText}`
+      );
     }
 
     return response.json();
   } catch (error) {
     if (error instanceof Error) {
-      if (error.name === 'AbortError') {
+      if (error.name === "AbortError") {
         console.error(`API call timeout for ${endpoint}`);
-        throw new Error('Request timeout - please check your internet connection');
+        throw new Error(
+          "Request timeout - please check your internet connection"
+        );
       }
-      if (error.message.includes('Network request failed')) {
+      if (error.message.includes("Network request failed")) {
         console.error(`Network error for ${endpoint}:`, error);
-        throw new Error('Network error - please check your internet connection');
+        throw new Error(
+          "Network error - please check your internet connection"
+        );
       }
     }
     console.error(`API call failed for ${endpoint}:`, error);

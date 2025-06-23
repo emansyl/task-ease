@@ -13,7 +13,7 @@ import { router } from "expo-router";
 import { useUser } from "../hooks/useApi";
 import { Ionicons } from "@expo/vector-icons";
 import { storage } from "../lib/storage";
-import { useAuth } from "../hooks/useAuth";
+import { useAuth } from "../providers/AuthProvider";
 import { api } from "../lib/api";
 import { formatForwardingEmail } from "../lib/email";
 
@@ -100,11 +100,11 @@ export default function Onboarding() {
       // Mark onboarding as completed in local storage
       await storage.setOnboardingCompleted(true);
       // Navigate to dashboard
-      router.replace("/dashboard");
+      router.replace("/");
     } catch (error) {
       console.error("Failed to complete onboarding:", error);
       // Still navigate to dashboard even if storage fails
-      router.replace("/dashboard");
+      router.replace("/");
     } finally {
       setIsCompletingOnboarding(false);
     }

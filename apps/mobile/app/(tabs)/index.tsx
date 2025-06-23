@@ -16,7 +16,7 @@ import {
 import { Link } from "expo-router";
 import { format, isToday, isTomorrow, parseISO } from "date-fns";
 import { Ionicons } from "@expo/vector-icons";
-import { useAuth } from "../../hooks/useAuth";
+import { useAuth } from "../../providers/AuthProvider";
 
 export default function Dashboard() {
   const { session } = useAuth();
@@ -27,7 +27,7 @@ export default function Dashboard() {
     refetch: refetchDashboard,
   } = useDashboard();
 
-  const { data: pendingTasks, isLoading: triageLoading } = usePendingTasks();
+  const { isLoading: triageLoading } = usePendingTasks();
 
   const completeTaskMutation = useCompleteTask();
 
@@ -41,7 +41,7 @@ export default function Dashboard() {
 
   const formatEventTime = (startTime: string, endTime: string) => {
     const start = parseISO(startTime);
-    const end = parseISO(endTime);
+    // const end = parseISO(endTime);
 
     if (isToday(start)) {
       return `Today, ${format(start, "h:mm a")}`;

@@ -38,13 +38,13 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
+      ],
+      [
+        "@react-native-google-signin/google-signin",
+        {
+          "iosUrlScheme": "com.googleusercontent.apps.79070326533-a441lv9o321415qa6ibd7ko5kflhktgs"
+        }
       ]
-      // [
-      //   "@react-native-google-signin/google-signin",
-      //   {
-      //     "iosUrlScheme": "com.googleusercontent.apps.79070326533-a441lv9o321415qa6ibd7ko5kflhktgs"
-      //   }
-      // ]
     ],
     "experiments": {
       "typedRoutes": true
