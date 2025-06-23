@@ -5,10 +5,10 @@ import {
   StyleSheet,
   TouchableOpacity,
   ActivityIndicator,
-  Clipboard,
   ScrollView,
   Alert,
 } from "react-native";
+import Clipboard from "@react-native-clipboard/clipboard";
 import { router } from "expo-router";
 import { useUser } from "../hooks/useApi";
 import { Ionicons } from "@expo/vector-icons";
@@ -35,8 +35,10 @@ export default function Onboarding() {
       if (!userLoading && user && !welcomeEmailSent && !isLoadingWelcomeEmail) {
         try {
           setIsLoadingWelcomeEmail(true);
-          console.log("Sending welcome email automatically on onboarding page load...");
-          
+          console.log(
+            "Sending welcome email automatically on onboarding page load..."
+          );
+
           await api.sendWelcomeEmail();
           setWelcomeEmailSent(true);
           console.log("Welcome email sent successfully on page load");
@@ -54,7 +56,9 @@ export default function Onboarding() {
 
   const handleCopyForwardingEmail = async () => {
     try {
-      const email = formatForwardingEmail(user?.forwardingemail || user?.id || "");
+      const email = formatForwardingEmail(
+        user?.forwardingemail || user?.id || ""
+      );
       await Clipboard.setString(email);
       setCopiedEmail(true);
       setTimeout(() => setCopiedEmail(false), 3000);
@@ -68,25 +72,22 @@ export default function Onboarding() {
     setShowGuide(true);
   };
 
-
   const handleSendSampleEmail = async () => {
     try {
       setIsSendingSampleEmail(true);
-      
-      const response = await api.sendSampleEmail();
-      
+
+      await api.sendSampleEmail();
+
       Alert.alert(
         "Sample Email Sent! 🧪",
-        `Check your email (${session?.user?.email}) and forward the sample email to your TaskEase address to test the extraction process.\n\nForward to: ${forwardingEmail}${welcomeEmailSent ? '\n\n💡 Your welcome email has already been processed - check your dashboard for sample data!' : ''}`,
+        `Check your email (${session?.user?.email}) and forward the sample email to your TaskEase address to test the extraction process.\n\nForward to: ${forwardingEmail}${welcomeEmailSent ? "\n\n💡 Your welcome email has already been processed - check your dashboard for sample data!" : ""}`,
         [{ text: "Got it!" }]
       );
     } catch (error) {
       console.error("Failed to send sample email:", error);
-      Alert.alert(
-        "Error",
-        "Failed to send sample email. Please try again.",
-        [{ text: "OK" }]
-      );
+      Alert.alert("Error", "Failed to send sample email. Please try again.", [
+        { text: "OK" },
+      ]);
     } finally {
       setIsSendingSampleEmail(false);
     }
@@ -109,7 +110,9 @@ export default function Onboarding() {
     }
   };
 
-  const forwardingEmail = formatForwardingEmail(user?.forwardingemail || user?.id || "");
+  const forwardingEmail = formatForwardingEmail(
+    user?.forwardingemail || user?.id || ""
+  );
 
   if (userLoading) {
     return (
@@ -321,7 +324,8 @@ export default function Onboarding() {
         </View>
 
         <Text style={styles.cardDescription}>
-          Want to see how TaskEase works before setting up email forwarding? Send yourself a sample email to test!
+          Want to see how TaskEase works before setting up email forwarding?
+          Send yourself a sample email to test!
         </Text>
 
         <TouchableOpacity
@@ -337,44 +341,52 @@ export default function Onboarding() {
           ) : (
             <>
               <Ionicons name="flask" size={20} color="#007AFF" />
-              <Text style={styles.sampleEmailButtonText}>Send Sample Email to Test</Text>
+              <Text style={styles.sampleEmailButtonText}>
+                Send Sample Email to Test
+              </Text>
             </>
           )}
         </TouchableOpacity>
 
         <Text style={styles.emailHintText}>
-          💡 Forward the sample email to your TaskEase address to see AI extraction in action
+          💡 Forward the sample email to your TaskEase address to see AI
+          extraction in action
         </Text>
       </View>
 
       {/* Welcome Email Status */}
-      <View style={[styles.infoCard, welcomeEmailSent && styles.infoCardSuccess]}>
+      <View
+        style={[styles.infoCard, welcomeEmailSent && styles.infoCardSuccess]}
+      >
         <View style={styles.infoHeader}>
           {isLoadingWelcomeEmail ? (
             <ActivityIndicator size={20} color="#007AFF" />
           ) : (
-            <Ionicons 
-              name={welcomeEmailSent ? "checkmark-circle" : "gift"} 
-              size={20} 
-              color={welcomeEmailSent ? "#34C759" : "#007AFF"} 
+            <Ionicons
+              name={welcomeEmailSent ? "checkmark-circle" : "gift"}
+              size={20}
+              color={welcomeEmailSent ? "#34C759" : "#007AFF"}
             />
           )}
-          <Text style={[styles.infoTitle, welcomeEmailSent && styles.infoTitleSuccess]}>
-            {isLoadingWelcomeEmail 
-              ? "Sending Welcome Email..." 
-              : welcomeEmailSent 
-                ? "Welcome Email Sent!" 
-                : "Preparing Welcome Email..."
-            }
+          <Text
+            style={[
+              styles.infoTitle,
+              welcomeEmailSent && styles.infoTitleSuccess,
+            ]}
+          >
+            {isLoadingWelcomeEmail
+              ? "Sending Welcome Email..."
+              : welcomeEmailSent
+                ? "Welcome Email Sent!"
+                : "Preparing Welcome Email..."}
           </Text>
         </View>
         <Text style={styles.infoText}>
-          {isLoadingWelcomeEmail 
+          {isLoadingWelcomeEmail
             ? "Our AI is preparing your sample tasks and events..."
-            : welcomeEmailSent 
+            : welcomeEmailSent
               ? "Check your email and dashboard! Your sample tasks and events are being processed right now."
-              : "We're sending you a welcome email that gets processed by our AI. You'll see sample tasks and events appear in your dashboard!"
-          }
+              : "We're sending you a welcome email that gets processed by our AI. You'll see sample tasks and events appear in your dashboard!"}
         </Text>
       </View>
 

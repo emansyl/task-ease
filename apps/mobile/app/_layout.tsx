@@ -15,19 +15,19 @@ export default function RootLayout() {
   const router = useRouter();
 
   // Debug logging for production with safety checks
-  console.log('RootLayout mounted, __DEV__:', __DEV__);
-  
+  console.log("RootLayout mounted, __DEV__:", __DEV__);
+
   // Validate critical environment variables
   const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL;
   const apiBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL;
-  
+
   if (!supabaseUrl) {
-    console.error('CRITICAL: EXPO_PUBLIC_SUPABASE_URL is missing');
+    console.error("CRITICAL: EXPO_PUBLIC_SUPABASE_URL is missing");
   }
-  
-  console.log('Environment variables loaded:', {
-    SUPABASE_URL: supabaseUrl ? 'present' : 'missing',
-    API_BASE_URL: apiBaseUrl || 'using fallback',
+
+  console.log("Environment variables loaded:", {
+    SUPABASE_URL: supabaseUrl ? "present" : "missing",
+    API_BASE_URL: apiBaseUrl || "using fallback",
   });
 
   // Check onboarding completion status from local storage
@@ -50,11 +50,11 @@ export default function RootLayout() {
     if (!loading && hasCompletedOnboarding !== null) {
       try {
         if (session) {
-          if (hasCompletedOnboarding) {
-            router.replace("/dashboard");
-          } else {
-            router.replace("/onboarding");
-          }
+          // if (hasCompletedOnboarding) {
+          router.replace("/dashboard");
+          // } else {
+          // router.replace("/onboarding");
+          // }
         } else {
           router.replace("/sign-in");
         }
@@ -79,7 +79,6 @@ export default function RootLayout() {
     <ErrorBoundary>
       <QueryProvider>
         <Stack screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="index" />
           <Stack.Screen name="onboarding" options={{ headerShown: false }} />
