@@ -8,11 +8,7 @@ import {
   ActivityIndicator,
   RefreshControl,
 } from "react-native";
-import {
-  useDashboard,
-  usePendingTasks,
-  useCompleteTask,
-} from "../../hooks/useApi";
+import { useDashboard, useCompleteTask } from "../../hooks/useApi";
 import { Link } from "expo-router";
 import { format, isToday, isTomorrow, parseISO } from "date-fns";
 import { Ionicons } from "@expo/vector-icons";
@@ -26,8 +22,6 @@ export default function Dashboard() {
     error: dashboardError,
     refetch: refetchDashboard,
   } = useDashboard();
-
-  const { isLoading: triageLoading } = usePendingTasks();
 
   const completeTaskMutation = useCompleteTask();
 
@@ -64,7 +58,7 @@ export default function Dashboard() {
     }
   };
 
-  const isRefreshing = dashboardLoading || triageLoading;
+  const isRefreshing = dashboardLoading;
 
   return (
     <ScrollView

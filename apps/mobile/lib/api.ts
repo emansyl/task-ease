@@ -86,7 +86,8 @@ async function getAuthHeaders() {
   } = await supabase.auth.getSession();
 
   if (!session?.access_token) {
-    throw new Error("No authentication token available");
+    console.warn("No auth token available — returning null headers");
+    return null;
   }
 
   return {
@@ -99,9 +100,13 @@ async function getAuthHeaders() {
 async function apiCall<T>(
   endpoint: string,
   options: RequestInit = {}
-): Promise<T> {
+): Promise<T | null> {
   try {
     const headers = await getAuthHeaders();
+    if (!headers) {
+      console.warn(`Skipping API call to ${endpoint} due to missing auth`);
+      return Promise.reject(new Error("Not authenticated"));
+    }
 
     console.log(`Making API call to: ${API_BASE_URL}/api${endpoint}`);
 
@@ -126,10 +131,7 @@ async function apiCall<T>(
       } catch {
         // Ignore JSON parsing errors
       }
-      console.error(`API Error ${response.status}:`, errorText);
-      throw new Error(
-        `API Error: ${response.status} ${response.statusText} - ${errorText}`
-      );
+      console.warn(`API Error ${response.status}:`, errorText);
     }
 
     return response.json();
@@ -137,42 +139,38 @@ async function apiCall<T>(
     if (error instanceof Error) {
       if (error.name === "AbortError") {
         console.error(`API call timeout for ${endpoint}`);
-        throw new Error(
-          "Request timeout - please check your internet connection"
-        );
+        return null;
       }
       if (error.message.includes("Network request failed")) {
         console.error(`Network error for ${endpoint}:`, error);
-        throw new Error(
-          "Network error - please check your internet connection"
-        );
+        return null;
       }
     }
     console.error(`API call failed for ${endpoint}:`, error);
-    throw error;
+    return null;
   }
 }
 
 // API functions for React Query
 export const api = {
   // User
-  getProfile: (): Promise<User> => apiCall<User>("/user/profile"),
+  getProfile: (): Promise<User | null> => apiCall<User>("/user/profile"),
 
-  updateProfile: (data: Partial<User>): Promise<User> =>
+  updateProfile: (data: Partial<User>): Promise<User | null> =>
     apiCall<User>("/user/profile", {
       method: "PUT",
       body: JSON.stringify(data),
     }),
 
   // Dashboard
-  getDashboardData: (): Promise<DashboardData> =>
+  getDashboardData: (): Promise<DashboardData | null> =>
     apiCall<DashboardData>("/dashboard"),
 
   // Tasks
   getTasks: (filter?: {
     status?: string;
     urgency?: string;
-  }): Promise<Task[]> => {
+  }): Promise<Task[] | null> => {
     const params = new URLSearchParams();
     if (filter?.status) params.append("status", filter.status);
     if (filter?.urgency) params.append("urgency", filter.urgency);
@@ -181,29 +179,29 @@ export const api = {
     return apiCall<Task[]>(`/tasks${query}`);
   },
 
-  getTask: (id: string): Promise<Task> => apiCall<Task>(`/tasks/${id}`),
+  getTask: (id: string): Promise<Task | null> => apiCall<Task>(`/tasks/${id}`),
 
   createTask: (
     task: Omit<Task, "id" | "userId" | "createdAt">
-  ): Promise<Task> =>
+  ): Promise<Task | null> =>
     apiCall<Task>("/tasks", {
       method: "POST",
       body: JSON.stringify(task),
     }),
 
-  updateTask: (id: string, updates: Partial<Task>): Promise<Task> =>
-    apiCall<Task>(`/tasks/${id}`, {
+  updateTask: (id: string, updates: Partial<Task>): Promise<Task | null> =>
+    apiCall<Task | null>(`/tasks/${id}`, {
       method: "PUT",
       body: JSON.stringify(updates),
     }),
 
-  deleteTask: (id: string): Promise<void> =>
-    apiCall<void>(`/tasks/${id}`, {
+  deleteTask: (id: string): Promise<void | null> =>
+    apiCall<void | null>(`/tasks/${id}`, {
       method: "DELETE",
     }),
 
-  completeTask: (id: string): Promise<Task> =>
-    apiCall<Task>(`/tasks/${id}/complete`, {
+  completeTask: (id: string): Promise<Task | null> =>
+    apiCall<Task | null>(`/tasks/${id}/complete`, {
       method: "POST",
     }),
 
@@ -211,7 +209,7 @@ export const api = {
   getEvents: (filter?: {
     startDate?: string;
     endDate?: string;
-  }): Promise<Event[]> => {
+  }): Promise<Event[] | null> => {
     const params = new URLSearchParams();
     if (filter?.startDate) params.append("startDate", filter.startDate);
     if (filter?.endDate) params.append("endDate", filter.endDate);
@@ -220,60 +218,44 @@ export const api = {
     return apiCall<Event[]>(`/events${query}`);
   },
 
-  getEvent: (id: string): Promise<Event> => apiCall<Event>(`/events/${id}`),
+  getEvent: (id: string): Promise<Event | null> =>
+    apiCall<Event>(`/events/${id}`),
 
   createEvent: (
     event: Omit<Event, "id" | "userId" | "createdAt">
-  ): Promise<Event> =>
+  ): Promise<Event | null> =>
     apiCall<Event>("/events", {
       method: "POST",
       body: JSON.stringify(event),
     }),
 
-  updateEvent: (id: string, updates: Partial<Event>): Promise<Event> =>
+  updateEvent: (id: string, updates: Partial<Event>): Promise<Event | null> =>
     apiCall<Event>(`/events/${id}`, {
       method: "PUT",
       body: JSON.stringify(updates),
     }),
 
-  deleteEvent: (id: string): Promise<void> =>
+  deleteEvent: (id: string): Promise<void | null> =>
     apiCall<void>(`/events/${id}`, {
       method: "DELETE",
     }),
 
   // Emails
-  getEmails: (limit?: number): Promise<Email[]> => {
+  getEmails: (limit?: number): Promise<Email[] | null> => {
     const params = limit ? `?limit=${limit}` : "";
     return apiCall<Email[]>(`/emails${params}`);
   },
 
-  getEmail: (id: string): Promise<Email> => apiCall<Email>(`/emails/${id}`),
-
-  // Triage
-  getPendingTasks: (): Promise<Task[]> => apiCall<Task[]>("/triage/tasks"),
-
-  approveTask: (id: string): Promise<Task> =>
-    apiCall<Task>(`/triage/tasks/${id}/approve`, {
-      method: "POST",
-    }),
-
-  rejectTask: (id: string): Promise<void> =>
-    apiCall<void>(`/triage/tasks/${id}/reject`, {
-      method: "POST",
-    }),
-
-  approveAndCompleteTask: (id: string): Promise<Task> =>
-    apiCall<Task>(`/triage/tasks/${id}/approve-complete`, {
-      method: "POST",
-    }),
+  getEmail: (id: string): Promise<Email | null> =>
+    apiCall<Email>(`/emails/${id}`),
 
   // Onboarding
   sendWelcomeEmail: (): Promise<{
     success: boolean;
     message: string;
     sentTo: string;
-  }> =>
-    apiCall<{ success: boolean; message: string; sentTo: string }>(
+  } | null> =>
+    apiCall<{ success: boolean; message: string; sentTo: string } | null>(
       "/onboarding/welcome-email",
       {
         method: "POST",
@@ -286,7 +268,7 @@ export const api = {
     sentTo: string;
     forwardTo: string;
     instructions: string;
-  }> =>
+  } | null> =>
     apiCall<{
       success: boolean;
       message: string;
