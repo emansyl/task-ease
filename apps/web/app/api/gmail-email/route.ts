@@ -50,13 +50,13 @@ function getEmailBody(
   if (parts) {
     // Find the plain text part first
     let plainTextPart = parts.find((part) => part.mimeType === "text/plain");
-    if (plainTextPart && plainTextPart.body?.data) {
+    if (plainTextPart && plainTextPart.body?.data && typeof plainTextPart.body.data === 'string') {
       return Buffer.from(plainTextPart.body.data, "base64url").toString("utf8");
     }
 
     // If no plain text, find the HTML part
     let htmlPart = parts.find((part) => part.mimeType === "text/html");
-    if (htmlPart && htmlPart.body?.data) {
+    if (htmlPart && htmlPart.body?.data && typeof htmlPart.body.data === 'string') {
       // Here you might want to strip HTML tags for a plain text version
       const htmlContent = Buffer.from(htmlPart.body.data, "base64url").toString(
         "utf8"
@@ -66,7 +66,7 @@ function getEmailBody(
   }
 
   // If no parts, the body might be in the main payload
-  if (payload.body?.data) {
+  if (payload.body?.data && typeof payload.body.data === 'string') {
     return Buffer.from(payload.body.data, "base64url").toString("utf8");
   }
 
@@ -105,6 +105,13 @@ export async function GET(request: NextRequest) {
     );
 
     // 3. Decrypt and set the credentials on the client
+    if (!integration.accessToken || !integration.refreshToken) {
+      return NextResponse.json(
+        { error: "Gmail access tokens are missing or invalid." },
+        { status: 400 }
+      );
+    }
+    
     const accessToken = decrypt(integration.accessToken);
     const refreshToken = decrypt(integration.refreshToken);
     oauth2Client.setCredentials({

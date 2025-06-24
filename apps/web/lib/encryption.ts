@@ -19,7 +19,11 @@ export function encrypt(text: string): string {
   return `${iv.toString("hex")}:${authTag.toString("hex")}:${encrypted.toString("hex")}`;
 }
 
-export function decrypt(hash: string): string {
+export function decrypt(hash: string | null | undefined): string {
+  if (!hash || typeof hash !== 'string') {
+    throw new Error("Invalid encrypted string: received null or undefined value.");
+  }
+  
   const [ivHex, authTagHex, encryptedHex] = hash.split(":");
   if (!ivHex || !authTagHex || !encryptedHex) {
     throw new Error("Invalid encrypted string format.");
