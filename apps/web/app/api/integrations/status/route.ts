@@ -1,21 +1,22 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { getUserIdFromRequest } from "@/lib/auth";
 
-export async function GET() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+export async function GET(request: NextRequest) {
+  // const supabase = await createClient();
+  // const {
+  //   data: { user },
+  // } = await supabase.auth.getUser();
+  const userId = await getUserIdFromRequest(request);
 
-  if (!user) {
+  if (!userId) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
   }
 
   try {
     const integrations = await prisma.integration.findMany({
       where: {
-        userId: user.id,
+        userId: userId,
       },
       // Only select the fields the client needs to know about
       select: {

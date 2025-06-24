@@ -12,6 +12,8 @@ import {
 } from "@/components/ui/card";
 import { Inbox } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import GmailCheckButton from "@/components/GmailCheckButton";
+import prisma from "@/lib/prisma";
 
 export default async function EmailsPage() {
   const userId = await getUserIdFromAuth();
@@ -20,6 +22,17 @@ export default async function EmailsPage() {
   }
 
   const { emails } = await getAllProcessedEmailsForUser(userId); // Fetch all emails
+
+  // Fetch Gmail integration last sync time
+  const gmailIntegration = await prisma.integration.findUnique({
+    where: {
+      userId_provider: {
+        userId,
+        provider: "gmail",
+      },
+    },
+    select: { lastSyncAt: true },
+  });
 
   return (
     <div className="container mx-auto p-4 md:p-8">
@@ -36,11 +49,16 @@ export default async function EmailsPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Your Email Digest List</CardTitle>
-          <CardDescription>
-            Browse and filter emails that have been processed by your AI
-            assistant. Click on an email to see a detailed breakdown.
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Your Email Digest List</CardTitle>
+              <CardDescription>
+                Browse and filter emails that have been processed by your AI
+                assistant. Click on an email to see a detailed breakdown.
+              </CardDescription>
+            </div>
+            <GmailCheckButton lastSyncAt={gmailIntegration?.lastSyncAt || null} />
+          </div>
         </CardHeader>
         <CardContent>
           <EmailListClient initialEmails={emails} />

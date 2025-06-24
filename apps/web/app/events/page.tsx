@@ -15,7 +15,7 @@ import { CalendarClock } from "lucide-react";
 export default async function EventsPage() {
   const userId = await getUserIdFromAuth();
   if (!userId) {
-    redirect("/login");
+    redirect("/sign-in");
   }
 
   const { events } = await getAllEventsForUser(userId); // Fetch all relevant events

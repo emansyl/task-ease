@@ -1,5 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { api, Task, Event, Email } from "../lib/api";
+import {
+  api,
+  Task,
+  Event,
+  Email,
+  IntegrationStatus,
+  UserSyncRequest,
+} from "../lib/api";
 
 // Query Keys
 export const queryKeys = {
@@ -12,6 +19,7 @@ export const queryKeys = {
   emails: ["emails"] as const,
   email: (id: string) => ["emails", id] as const,
   triage: ["triage"] as const,
+  integrations: ["integrations"] as const,
 } as const;
 
 // User hooks
@@ -198,6 +206,71 @@ export function useEmail(id: string) {
     initialData: () => {
       const emails = queryClient.getQueryData<Email[]>(["emails"]);
       return emails?.find((email: Email) => email.id === id);
+    },
+  });
+}
+
+// Integration hooks
+export function useIntegrations() {
+  return useQuery({
+    queryKey: queryKeys.integrations,
+    queryFn: api.getIntegrationStatus,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+}
+
+export function useIntegrationStatus(provider: IntegrationStatus["provider"]) {
+  const { data: integrations, isLoading, error } = useIntegrations();
+
+  const integration = integrations?.find(
+    (integration) => integration.provider === provider
+  );
+
+  return {
+    isActive: integration?.isActive || false,
+    email: integration?.email || null,
+    connectedAt: integration?.connectedAt || null,
+    isLoading,
+    error,
+  };
+}
+
+// User sync hook
+export function useSyncUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (data: UserSyncRequest) => api.syncUser(data),
+    onSuccess: (response) => {
+      // Invalidate user data after successful sync
+      queryClient.invalidateQueries({ queryKey: queryKeys.user });
+
+      // You can add additional logic here based on the response
+      if (response?.status === "created") {
+        console.log("User created successfully");
+      } else if (response?.status === "already exists") {
+        console.log("User already exists");
+      }
+    },
+    onError: (error) => {
+      console.error("Failed to sync user:", error);
+    },
+  });
+}
+
+// Gmail hooks
+export function useRefreshGmailEmails() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: api.refreshGmailEmails,
+    onSuccess: () => {
+      // Invalidate all email-related queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: queryKeys.emails });
+      queryClient.invalidateQueries({ queryKey: queryKeys.dashboard });
+    },
+    onError: (error) => {
+      console.error("Failed to refresh Gmail emails:", error);
     },
   });
 }

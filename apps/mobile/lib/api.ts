@@ -22,7 +22,7 @@ function getApiBaseUrl(): string {
   return "https://usetaskease.com";
 }
 
-const API_BASE_URL = getApiBaseUrl();
+export const API_BASE_URL = getApiBaseUrl();
 
 // Types based on your Prisma schema
 export interface Task {
@@ -70,6 +70,28 @@ export interface User {
   email: string;
   forwardingemail: string;
   created_at?: string;
+}
+
+export interface IntegrationStatus {
+  provider:
+    | "gmail"
+    | "google_calendar"
+    | "notion"
+    | "apple_calendar"
+    | "todoist"
+    | "slack";
+  isActive: boolean;
+  email: string | null;
+  connectedAt: string;
+}
+
+export interface UserSyncRequest {
+  id: string;
+  email: string;
+}
+
+export interface UserSyncResponse {
+  status: "created" | "already exists";
 }
 
 export interface DashboardData {
@@ -160,6 +182,16 @@ export const api = {
       method: "PUT",
       body: JSON.stringify(data),
     }),
+
+  syncUser: (data: UserSyncRequest): Promise<UserSyncResponse | null> =>
+    apiCall<UserSyncResponse>("/user/sync", {
+      method: "POST",
+      body: JSON.stringify(data),
+    }),
+
+  // Integrations
+  getIntegrationStatus: (): Promise<IntegrationStatus[] | null> =>
+    apiCall<IntegrationStatus[]>("/integrations/status"),
 
   // Dashboard
   getDashboardData: (): Promise<DashboardData | null> =>
@@ -276,5 +308,19 @@ export const api = {
       instructions: string;
     }>("/onboarding/sample-email", {
       method: "POST",
+    }),
+
+  // Gmail
+  refreshGmailEmails: (): Promise<{
+    success: boolean;
+    message: string;
+    emailIds: string[];
+  } | null> =>
+    apiCall<{
+      success: boolean;
+      message: string;
+      emailIds: string[];
+    }>("/gmail-email", {
+      method: "GET",
     }),
 };

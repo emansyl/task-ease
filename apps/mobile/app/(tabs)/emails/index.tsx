@@ -14,6 +14,7 @@ import { useEmails } from "../../../hooks/useApi";
 import { Email } from "../../../lib/api";
 import { format, parseISO, isToday, isTomorrow } from "date-fns";
 import { Ionicons } from "@expo/vector-icons";
+import { GmailButton } from "../../../components/GmailButton";
 
 type StatusFilter = "all" | "processed" | "pending" | "error";
 
@@ -266,11 +267,16 @@ export default function Emails() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Emails</Text>
-        <Text style={styles.subtitle}>
-          {filteredEmails.length}{" "}
-          {filteredEmails.length === 1 ? "email" : "emails"}
-        </Text>
+        <View style={styles.headerContent}>
+          <View>
+            <Text style={styles.title}>Emails</Text>
+            <Text style={styles.subtitle}>
+              {filteredEmails.length}{" "}
+              {filteredEmails.length === 1 ? "email" : "emails"}
+            </Text>
+          </View>
+          <GmailButton />
+        </View>
       </View>
 
       <View style={styles.filterBar}>
@@ -329,6 +335,11 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderBottomWidth: 1,
     borderBottomColor: "#e1e1e1",
+  },
+  headerContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   title: {
     fontSize: 32,

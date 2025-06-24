@@ -15,7 +15,7 @@ import { ListChecks } from "lucide-react";
 export default async function TasksPage() {
   const userId = await getUserIdFromAuth();
   if (!userId) {
-    redirect("/login");
+    redirect("/sign-in");
   }
 
   const { tasks } = await getAllTasksForUser(userId); // Fetch all tasks

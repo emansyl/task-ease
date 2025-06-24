@@ -268,7 +268,7 @@ const GmailConnectionStep = () => (
         with TaskEase AI
       </Text>
 
-      <GmailConnectCard showTitle={false} style={styles.gmailCard} />
+      <GmailConnectCard style={styles.gmailCard} />
 
       <View style={styles.alternativeMethod}>
         <Text style={styles.sectionTitle}>Alternative Method</Text>

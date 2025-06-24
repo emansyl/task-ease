@@ -55,7 +55,7 @@ export const metadata = {
 export default async function SettingsPage() {
   const userId = await getUserIdFromAuth();
   if (!userId) {
-    redirect("/login");
+    redirect("/sign-in");
   }
 
   const settings = await getUserSettings(userId);

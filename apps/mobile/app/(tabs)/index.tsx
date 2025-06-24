@@ -13,6 +13,7 @@ import { Link } from "expo-router";
 import { format, isToday, isTomorrow, parseISO } from "date-fns";
 import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../../providers/AuthProvider";
+// import { GmailButton } from "../../components/GmailButton";
 
 export default function Dashboard() {
   const { session } = useAuth();
@@ -71,10 +72,15 @@ export default function Dashboard() {
       }
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Dashboard</Text>
-        <Text style={styles.subtitle}>
-          Welcome back, {session?.user?.email?.split("@")[0]}
-        </Text>
+        <View style={styles.headerContent}>
+          <View>
+            <Text style={styles.title}>Dashboard</Text>
+            <Text style={styles.subtitle}>
+              Welcome back, {session?.user?.email?.split("@")[0]}
+            </Text>
+          </View>
+          {/* <GmailButton style={styles.gmailButton} /> */}
+        </View>
       </View>
 
       {dashboardError && (
@@ -225,6 +231,14 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     borderBottomWidth: 1,
     borderBottomColor: "#e1e1e1",
+  },
+  headerContent: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+  },
+  gmailButton: {
+    marginTop: 8,
   },
   title: {
     fontSize: 32,

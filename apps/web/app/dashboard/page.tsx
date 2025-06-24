@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 // Import the new Client Component
 import CopyForwardingEmailButton from "@/components/dashboard/CopyForwardingEmailButton"; // Adjust path if needed
+import GmailCheckButton from "@/components/GmailCheckButton";
 
 import prisma from "@/lib/prisma";
 
@@ -44,6 +45,7 @@ export interface DashboardData {
   recentEmails: ProcessedEmailListItem[];
   upcomingEvents: UIEvent[];
   dueSoonTasks: UITask[];
+  gmailLastSyncAt: Date | null;
 }
 
 async function getDashboardData(userId: string): Promise<DashboardData | null> {
@@ -159,11 +161,23 @@ async function getDashboardData(userId: string): Promise<DashboardData | null> {
       })),
     }));
 
+    // Fetch Gmail integration last sync time
+    const gmailIntegration = await prisma.integration.findUnique({
+      where: {
+        userId_provider: {
+          userId,
+          provider: "gmail",
+        },
+      },
+      select: { lastSyncAt: true },
+    });
+
     return {
       userForwardingEmail: user.forwardingemail,
       recentEmails,
       upcomingEvents,
       dueSoonTasks,
+      gmailLastSyncAt: gmailIntegration?.lastSyncAt || null,
     };
   } catch (error) {
     console.error("Failed to fetch dashboard data:", error);
@@ -173,6 +187,7 @@ async function getDashboardData(userId: string): Promise<DashboardData | null> {
       recentEmails: [],
       upcomingEvents: [],
       dueSoonTasks: [],
+      gmailLastSyncAt: null,
     };
   }
 }
@@ -356,12 +371,17 @@ async function DashboardPageContent({ data }: { data: DashboardData }) {
       {/* Recently Processed Emails Widget */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-xl flex items-center gap-2">
-            <Mail size={22} /> Recently Processed Emails
-          </CardTitle>
-          <CardDescription>
-            Your latest emails processed by the assistant.
-          </CardDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-xl flex items-center gap-2">
+                <Mail size={22} /> Recently Processed Emails
+              </CardTitle>
+              <CardDescription>
+                Your latest emails processed by the assistant.
+              </CardDescription>
+            </div>
+            <GmailCheckButton lastSyncAt={data.gmailLastSyncAt} />
+          </div>
         </CardHeader>
         <CardContent className="space-y-3">
           {data.recentEmails.length > 0 ? (
@@ -433,7 +453,7 @@ export default async function Page() {
   const userId = await getUserIdFromAuth();
 
   if (!userId) {
-    redirect("/login");
+    redirect("/sign-in");
   }
 
   const dashboardData = await getDashboardData(userId);
