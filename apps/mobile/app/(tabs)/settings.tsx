@@ -17,6 +17,7 @@ import { useUser } from "../../hooks/useApi";
 import { Ionicons } from "@expo/vector-icons";
 import { storage } from "../../lib/storage";
 import { formatForwardingEmail } from "../../lib/email";
+import { GmailConnectCard } from "../../components/GmailConnectCard";
 
 export default function Settings() {
   const [session, setSession] = useState<Session | null>(null);
@@ -191,9 +192,15 @@ export default function Settings() {
         </View>
       </View>
 
+      {/* Gmail Connection Section */}
+      <View style={styles.section}>
+        <Text style={styles.sectionTitle}>Email Integration</Text>
+        <GmailConnectCard style={styles.gmailCard} />
+      </View>
+
       {/* Integrations Section */}
       <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Integrations</Text>
+        <Text style={styles.sectionTitle}>Other Integrations</Text>
 
         {integrations.map((integration, index) => (
           <TouchableOpacity
@@ -545,5 +552,10 @@ const styles = StyleSheet.create({
   },
   bottomPadding: {
     height: 40,
+  },
+  gmailCard: {
+    margin: 0,
+    shadowOpacity: 0, // Remove extra shadow since section already has shadow
+    elevation: 0,
   },
 });

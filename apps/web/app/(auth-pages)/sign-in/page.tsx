@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { Separator } from "@/components/ui/separator";
+import SignInWithGoogleButton from "@/components/signInWithGoogleButton";
 
 export default async function Login(props: { searchParams: Promise<Message> }) {
   const searchParams = await props.searchParams;
@@ -63,6 +64,12 @@ export default async function Login(props: { searchParams: Promise<Message> }) {
           </SubmitButton>
           <FormMessage message={searchParams} />
         </form>
+
+        <Separator className="my-4" />
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground mb-4">Or continue with</p>
+          <SignInWithGoogleButton />
+        </div>
       </CardContent>
       <CardFooter className="flex-col items-center">
         <Separator className="mb-4" />

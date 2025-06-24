@@ -28,6 +28,8 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
+    "google-one-tap": "^1.0.6",
+    "googleapis": "^150.0.1",
     "ics": "^3.8.1",
     "lucide-react": "^0.468.0",
     "next": "latest",
@@ -36,7 +38,8 @@
     "prettier": "^3.3.3",
     "prisma": "^6.8.2",
     "react": "19.0.0",
-    "react-dom": "19.0.0"
+    "react-dom": "19.0.0",
+    "zod": "^3.25.67"
   },
   "devDependencies": {
     "@types/node": "22.10.2",

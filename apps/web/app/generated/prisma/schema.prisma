@@ -19,6 +19,7 @@ model User {
   events          Event[]
   keyInfo         KeyInformation[]
   taskLogs        TaskLog[]
+  integrations    Integration[]
 }
 
 model Email {
@@ -113,6 +114,27 @@ model TaskLog {
   user      User     @relation(fields: [userId], references: [id]) // Uncomment if you add User relation
 }
 
+model Integration {
+  id                String          @id @default(cuid())
+  userId            String          @db.Uuid
+  provider          IntegrationType
+  providerAccountId String? // External account ID from the provider
+  email             String? // For email-based integrations like Gmail
+  accessToken       String? // OAuth access token
+  refreshToken      String? // OAuth refresh token  
+  tokenExpiresAt    DateTime? // When the access token expires
+  scopes            String[] // Granted permissions/scopes
+  isActive          Boolean         @default(true)
+  connectedAt       DateTime        @default(now())
+  lastSyncAt        DateTime?
+  metadata          Json? // Additional provider-specific data
+  user              User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, provider]) // Each user can only have one integration per provider
+  @@index([userId])
+  @@index([provider])
+}
+
 enum TaskStatus {
   todo
   in_progress
@@ -141,4 +163,13 @@ enum EmailStatus {
   pending
   processed
   error
+}
+
+enum IntegrationType {
+  gmail
+  google_calendar
+  notion
+  apple_calendar
+  todoist
+  slack
 }

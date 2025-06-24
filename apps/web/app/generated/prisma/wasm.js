@@ -196,9 +196,30 @@ exports.Prisma.TaskLogScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.IntegrationScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  provider: 'provider',
+  providerAccountId: 'providerAccountId',
+  email: 'email',
+  accessToken: 'accessToken',
+  refreshToken: 'refreshToken',
+  tokenExpiresAt: 'tokenExpiresAt',
+  scopes: 'scopes',
+  isActive: 'isActive',
+  connectedAt: 'connectedAt',
+  lastSyncAt: 'lastSyncAt',
+  metadata: 'metadata'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
+};
+
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
 };
 
 exports.Prisma.QueryMode = {
@@ -209,6 +230,12 @@ exports.Prisma.QueryMode = {
 exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
+};
+
+exports.Prisma.JsonNullValueFilter = {
+  DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull,
+  AnyNull: Prisma.AnyNull
 };
 exports.EmailCategory = exports.$Enums.EmailCategory = {
   Academic_Classes: 'Academic_Classes',
@@ -240,6 +267,15 @@ exports.TaskStatus = exports.$Enums.TaskStatus = {
   complete: 'complete'
 };
 
+exports.IntegrationType = exports.$Enums.IntegrationType = {
+  gmail: 'gmail',
+  google_calendar: 'google_calendar',
+  notion: 'notion',
+  apple_calendar: 'apple_calendar',
+  todoist: 'todoist',
+  slack: 'slack'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   Email: 'Email',
@@ -247,7 +283,8 @@ exports.Prisma.ModelName = {
   Event: 'Event',
   KeyInformation: 'KeyInformation',
   LinkOrAttachment: 'LinkOrAttachment',
-  TaskLog: 'TaskLog'
+  TaskLog: 'TaskLog',
+  Integration: 'Integration'
 };
 
 /**

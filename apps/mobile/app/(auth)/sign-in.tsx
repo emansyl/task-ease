@@ -28,9 +28,17 @@ export default function SignIn() {
     }
 
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error, data } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password: password,
+    });
+
+    await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/user/sync`, {
+      method: "POST",
+      body: JSON.stringify({
+        id: data.user?.id,
+        email: data.user?.email,
+      }),
     });
 
     if (error) {

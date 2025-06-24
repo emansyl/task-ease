@@ -37,17 +37,22 @@ export default function SignUp() {
     }
 
     setLoading(true);
-    const {
-      data: { session },
-      error,
-    } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email: email.trim(),
       password: password,
     });
 
+    await fetch(`${process.env.EXPO_PUBLIC_API_URL}/api/user/sync`, {
+      method: "POST",
+      body: JSON.stringify({
+        id: data.user?.id,
+        email: data.user?.email,
+      }),
+    });
+
     if (error) {
       Alert.alert("Sign Up Error", error.message);
-    } else if (!session) {
+    } else if (!data.user) {
       Alert.alert("Success", "Please check your inbox for email verification!");
     } else {
       router.replace("/");

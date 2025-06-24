@@ -1,5 +1,4 @@
 import { createClient } from "@/utils/supabase/server";
-import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { NextRequest } from "next/server";
 
 export async function getUserIdFromAuth(): Promise<string | null> {
@@ -23,10 +22,7 @@ export async function getUserIdFromRequest(
     const token = authHeader.substring(7); // Remove "Bearer " prefix
 
     // Create a Supabase client to verify the token
-    const supabase = createSupabaseClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    const supabase = await createClient();
 
     const { data, error } = await supabase.auth.getUser(token);
 

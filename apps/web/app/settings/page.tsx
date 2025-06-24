@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import CopyForwardingEmailButton from "@/components/dashboard/CopyForwardingEmailButton"; // Reuse this
 import { signOutAction } from "@/app/actions";
+import IntegrationsSection from "@/components/IntegrationsSection";
+
 interface UserSettingsData {
   email: string | undefined;
   forwardingEmail: string | null;
@@ -125,6 +127,9 @@ export default async function SettingsPage() {
           </Button>
         </CardContent>
       </Card>
+
+      {/* Integrations Section */}
+      <IntegrationsSection />
 
       {/* Theme Settings Card (Optional) */}
       <Card>

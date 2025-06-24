@@ -10,6 +10,7 @@ export const signUpAction = async (formData: FormData) => {
   const password = formData.get("password")?.toString();
   const supabase = await createClient();
   const origin = (await headers()).get("origin");
+  console.log(origin);
 
   if (!email || !password) {
     return encodedRedirect(
@@ -19,12 +20,21 @@ export const signUpAction = async (formData: FormData) => {
     );
   }
 
-  const { error } = await supabase.auth.signUp({
+  const { error, data } = await supabase.auth.signUp({
     email,
     password,
     options: {
       emailRedirectTo: `${origin}/auth/callback`,
     },
+  });
+  console.log(error, data);
+
+  await fetch(`${origin}/api/user/sync`, {
+    method: "POST",
+    body: JSON.stringify({
+      id: data.user?.id,
+      email: data.user?.email,
+    }),
   });
 
   if (error) {
@@ -39,10 +49,19 @@ export const signInAction = async (formData: FormData) => {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const supabase = await createClient();
+  const origin = (await headers()).get("origin");
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error, data } = await supabase.auth.signInWithPassword({
     email,
     password,
+  });
+
+  await fetch(`${origin}/api/user/sync`, {
+    method: "POST",
+    body: JSON.stringify({
+      id: data.user?.id,
+      email: data.user?.email,
+    }),
   });
 
   if (error) {
